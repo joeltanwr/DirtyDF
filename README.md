@@ -1,6 +1,7 @@
 # artificial-dataset-generation
-
+<!--
 *** Template copied from Best-README-Template.
+-->
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
