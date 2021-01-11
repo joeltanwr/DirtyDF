@@ -1,0 +1,30 @@
+retail_clean.rds
+===============
+
+Each line in the dataset contains the record of a transaction between a
+customer and a retailer. These are the columns:
+
+1. InvoiceNo: The invoice number for the purchase. 
+2. StockCode: A code number for the item purchased.
+3. Description: A description of the item.
+4. Quantity: The number of units of that particular item bought.
+5. InvoiceDate: The date and time at which the invoice was issued, i.e. that
+the item was purchased.
+6. UnitPrice: The price of one unit of that item.
+7. CustomerID: A unique identifier for that customer.
+8. Country: The country in which the customer is situated.
+
+cty_coords.rds
+=============
+
+Information on the geographical location of countries:
+
+1. rtl: Country name
+2. long: Longitude of the centroid for that country (Goes on the x-axis).
+3. lat: Latitude of the centroid for that country (Goes on the y-axis).
+4. group: Continent for each country.
+
+cust_features.rds
+=================
+
+See question on Customer Features.
