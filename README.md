@@ -3,6 +3,8 @@
 *** Template copied from Best-README-Template.
 -->
 
+Here is the link to the [googe docs page](https://docs.google.com/document/d/1xx8zuYClWEub_PF7pGM0r0JRInK3ZfgWVWE1w19VfVU/edit)
+
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
