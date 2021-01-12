@@ -1,5 +1,6 @@
 import pandas as pd
 from random import randint, random
+from random import seed as rseed
 from time import time
 from warnings import warn
 
@@ -23,8 +24,11 @@ class Stainer():
         fixed_col (list):  
             List of column names / numbers (0-index) which are to be stained. 
             Defaults to None (no additional restriction on specific columns)
+        seed (int):
+            Customise the start number of RNG. Overwrites seed stated in Combiner.
+            Defaults to the Combiner seed if unstated
     """
-    def __init__(self, style, deg, fixed_row = [], fixed_col = []):
+    def __init__(self, style, deg, fixed_row = [], fixed_col = [], seed = None):
         self.style = style 
         if 0 <= deg <= 1:
             self.deg = deg
@@ -33,16 +37,23 @@ class Stainer():
                              style, "Skipping Stainer")
         self.fixed_row = fixed_row
         self.fixed_col = fixed_col
+        self.seed = seed
         
-    def transform(self, ddf):
+    def transform(self, ddf, seed):
         """ 
         Modifies the dirtydf object by applying the relevant staining 
         
         Args:
             ddf (dirtydf):
                 DataFrame that is to be transformed using this stainer
+            seed (int):
+                Seed for the transformation
         """
-        raise StainerNotImplementedError("Transform not defined", "General")
+        # Set seed
+        if self.seed:
+            seed = self.seed
+        rseed(seed)
+##        print("Seed set at: ", seed) # Line for debugging 
 
         
 class AddDuplicate(Stainer):
@@ -61,8 +72,8 @@ class AddDuplicate(Stainer):
             the original row was duplicated once to create 2 copies total.
             Capped at 5 to conserve computational power
     """
-    def __init__(self, deg, fixed_row = [], fixed_col = [], randomize_order = False, max_rep = 2):
-        super().__init__("Insert Duplicates", deg, fixed_row, fixed_col)
+    def __init__(self, deg, fixed_row = [], fixed_col = [], seed = None, randomize_order = False, max_rep = 2):
+        super().__init__("Insert Duplicates", deg, fixed_row, fixed_col, seed)
         if fixed_col:
             warn("Insert Duplicates: Cannot fix column. Using all columns instead")
             fixed_col = []
@@ -75,7 +86,7 @@ class AddDuplicate(Stainer):
             raise InputError("Invalid value for max_rep: Should be in range [2, 5], provided {max_rep} instead", \
                             style, "Skipping Stainer")
 
-    def transform(self, ddf):
+    def transform(self, ddf, seed):
         """
         A. For data that have been identified as fixed_rows, they will be duplicated regardless.
         B. For other data, there will be a % chance they will be duplicated, depending on the degree that was set
@@ -84,8 +95,11 @@ class AddDuplicate(Stainer):
         
         C. If randomizing is required after the adding of rows, the rows will be randomized.
         """
+        super().transform(ddf, seed)
+        
         temp_df = []
-        start = time()          
+        start = time()
+        initial_size = ddf.df.shape[0]
         counter = 0
         
         for row in ddf.df.itertuples(index = False):
@@ -105,15 +119,18 @@ class AddDuplicate(Stainer):
             temp_df = temp_df.sample(frac=1).reset_index(drop=True)
                     
         ddf.df = temp_df
-        
+
+        final_size = ddf.df.shape[0]
         end = time()
         time_taken = end - start
         
-        message = f"Added Duplicate Rows for {len(self.fixed_row)} specified rows and {self.deg * 100}% of the remaining rows. Each duplicated row should appear a maximum of {self.max_rep} time"
+        message = f"Added Duplicate Rows for {len(self.fixed_row)} specified rows and {self.deg * 100}% of the remaining rows. " + \
+                  f"Each duplicated row should appear a maximum of {self.max_rep} times. " + \
+                  f"Rows added: {final_size - initial_size}"
         if ddf.history:
-            hist = HistoryDF(message, time_taken, ddf.df.copy())
+            hist = HistoryDF(message, time_taken, seed, ddf.df.copy())
         else:
-            hist = HistoryDF(message, time_taken)
+            hist = HistoryDF(message, time_taken, seed)
         ddf.summary.append(hist)
         
         

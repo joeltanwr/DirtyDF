@@ -1,4 +1,6 @@
 from random import shuffle
+from random import seed as rseed
+from time import time
 from errors import *
 
 class DirtyDF():
@@ -26,7 +28,7 @@ class DirtyDF():
         
     def get_finalDF(self):
         return self.df
-    
+
     def get_full_history(self):
         """
         Ideally, this would export some file that will contain the summary of the whole process.
@@ -44,10 +46,11 @@ class HistoryDF():
     Stores the actions and dataframes after each action
     """
     
-    def __init__(self, action, time, df = None):
+    def __init__(self, action, time, seed, df = None):
         self.action = action
         self.df = df
         self.time = time
+        self.seed = seed
         
     def print_action(self, verbose = 0):
         """ 
@@ -67,17 +70,21 @@ class Combiner():
     transformations in a pre-determined order
     
     Args:
-        ddf (dirtydf): 
-            DirtyDF object to be stained
         stainers (list<Stainers>):
             List of Stainers to be used
         random_order (boolean):
-            By default, will be in a logical random order.
-            If False, the stainers will be applied in sequence provided. However, the order provided must compatible
+            By default, the stainers will be applied in sequence provided. However, the order provided must compatible
+            If set to True, a logical random order will be chosen instead
+        seed (int):
+            Only relevant if random_order set to True
+            Determines seed for order of stainers
     """
     
-    def __init__(self, ddf, stainers, random_order = True):
-        self.ddf = ddf 
+    def __init__(self, stainers, random_order = False, seed = None):
+        if seed:
+            self.seed = seed
+        else:
+            self.seed = round(time() * 10)
         self.stainers = stainers
         self.random_order = random_order
         
@@ -86,18 +93,28 @@ class Combiner():
         else:
             if not self.check_valid(stainers):
                 raise Exception("Invalid sequence of stainers")
+
+    def get_ordering_seed(self):
+        return self.seed
     
     def get_finalDDF(self):
         return self.ddf
     
     def random_stain(self):
+        rseed(self.seed)
         """
         Rearranges the stainers in a random order
         
         !!! NOTE FOR FUTURE: Should have some logic to control the randomisation, 
             will need to insert
         """
-        shuffle(self.stainers)
+        try:
+            shuffle(self.stainers)
+            print(f"Randomisation complete with seed {self.get_ordering_seed()}")
+        except:
+            print("Randomisation failed. Attempting to use given order")
+            if not self.check_valid(stainers):
+                raise Exception("Invalid sequence of stainers")
     
     def check_valid(self, lst):
         """
@@ -110,15 +127,33 @@ class Combiner():
         """
         return True
     
-    def transform_all(self):
+    def transform_all(self, ddf, seed = None):
+        """
+        Processes all the Stainers and applies the transformations
+
+        Args:
+            ddf (dirtydf): 
+                DirtyDF object to be stained
+            seed (int):
+                Default seed for all the Stainers within the Combiner
+                If unspecified, will randomly generate a seed to be used
+
+        Raises:
+            StainerNotImplementedError
+                If the specified stainer does not have a transform method.
+                Will result in skipping the stainer
+            Error
+                If the stainer is not compatible with the dataset. Will result in
+                skipping the stainer
+        """
+        if not seed:
+            seed = round(time() * 10)
+
         for stain in self.stainers:
             try:
-                stain.transform(self.ddf)
+                stain.transform(ddf, seed)
             except StainerNotImplementedError:
                 print(f"{stain.style} not implemented")
 #             except Exception as e: # Removed now to assist debugging
 #                 print(f"ERROR: {e}. Skipping {stain.style}")
-                
-                
-        
-    
+        return ddf
