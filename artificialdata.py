@@ -11,7 +11,8 @@ class DirtyDF():
     
     Args: 
         df (DataFrame):
-            pandas DataFrame object that is meant to be dirtied
+            pandas DataFrame object that is meant to be dirtied.
+            Creates a new copy so that the original data will not be affected
         history (boolean):
             If True, will store all intermediate DataFrame (May require signficantly more space + time)
             
@@ -22,7 +23,7 @@ class DirtyDF():
         
     """
     def __init__(self, df, history = False, verbose = 1):
-        self.df = df
+        self.df = df.copy()
         self.history = history
         self.summary = []
         
