@@ -1,5 +1,7 @@
 import pandas as pd
-from random import randint, random
+import numpy as np
+from itertools import product
+from random import choice, randint, random, sample
 from random import seed as rseed
 from time import time
 from warnings import warn
@@ -72,11 +74,8 @@ class AddDuplicate(Stainer):
             the original row was duplicated once to create 2 copies total.
             Capped at 5 to conserve computational power
     """
-    def __init__(self, deg, fixed_row = [], fixed_col = [], seed = None, randomize_order = False, max_rep = 2):
-        super().__init__("Insert Duplicates", deg, fixed_row, fixed_col, seed)
-        if fixed_col:
-            warn("Insert Duplicates: Cannot fix column. Using all columns instead")
-            fixed_col = []
+    def __init__(self, deg, fixed_row = [], seed = None, randomize_order = False, max_rep = 2):
+        super().__init__("Insert Duplicates", deg, fixed_row, [] , seed)
         self.randomize_order = randomize_order
         self.max_rep = max_rep
         if max_rep > 5:
@@ -101,6 +100,7 @@ class AddDuplicate(Stainer):
         start = time()
         initial_size = ddf.df.shape[0]
         counter = 0
+        total_added = 0
         
         for row in ddf.df.itertuples(index = False):
             if counter in self.fixed_row: # STEP A
@@ -109,6 +109,7 @@ class AddDuplicate(Stainer):
                 rand_num = random() # STEP B
                 if rand_num <= self.deg:
                     temp_df.extend([list(row)] * randint(2, self.max_rep))
+                    total_added += 1
                 else:
                     temp_df.append(list(row))
             counter += 1
@@ -124,14 +125,11 @@ class AddDuplicate(Stainer):
         end = time()
         time_taken = end - start
         
-        message = f"Added Duplicate Rows for {len(self.fixed_row)} specified rows and {self.deg * 100}% of the remaining rows. " + \
-                  f"Each duplicated row should appear a maximum of {self.max_rep} times. " + \
-                  f"Rows added: {final_size - initial_size}"
+        message = f"Added Duplicate Rows for {len(self.fixed_row)} specified rows and {total_added} additional rows. \n" + \
+                  f"Each duplicated row should appear a maximum of {self.max_rep} times. \n" + \
+                  f"Rows added: {final_size - initial_size}. \n"
         if ddf.history:
             hist = HistoryDF(message, time_taken, seed, ddf.df.copy())
         else:
             hist = HistoryDF(message, time_taken, seed)
-        ddf.summary.append(hist)
-        
-        
-        
+        ddf.summary.append(hist)  
