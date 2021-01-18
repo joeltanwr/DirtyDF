@@ -132,4 +132,121 @@ class AddDuplicate(Stainer):
             hist = HistoryDF(message, time_taken, seed, ddf.df.copy())
         else:
             hist = HistoryDF(message, time_taken, seed)
-        ddf.summary.append(hist)  
+        ddf.summary.append(hist)
+        
+
+class Nullify(Stainer):
+    """
+    Stainer that convert various values to missing data / values that represent missing values.
+
+    Degree:
+        Determines the proportion of selected data that would be nullified
+
+    Additional Args:
+        new_val (int/str):
+            Value that would replace the specific data.
+            Defaults to None
+    """
+    def __init__(self, deg, fixed_row = [], fixed_col = [], seed = None, new_val = None):
+        super().__init__("Nullify", deg, fixed_row, fixed_col, seed)
+        self.new_val = new_val
+
+    def transform(self, ddf, seed):
+        """
+        If no specification, all rows and columns will be selected.
+        The specified proportion of cells would then be identified to be nullified.
+        """
+        super().transform(ddf, seed)
+
+        start = time()
+
+        df = ddf.df
+        n_rows, n_cols = df.shape
+
+        rows, cols = self.fixed_row, self.fixed_col
+        if not rows:
+            rows = [i for i in range(n_rows)]
+        if not cols:
+            cols = [i for i in range(n_cols)]
+            
+        all_cells = list(product(rows, cols))
+        total_null = int(len(all_cells) * self.deg)
+        selected_cells = sample(all_cells, k = total_null)
+        
+        for row, col in selected_cells:
+            df.iloc[row, col] = self.new_val
+        
+        end = time()
+        time_taken = end - start
+        
+        message = f"Replaced {total_null} values to become {'empty' if self.new_val == None else self.new_val} in specificed rows/cols. \n"
+        if ddf.history:
+            hist = HistoryDF(message, time_taken, seed, ddf.df.copy())
+        else:
+            hist = HistoryDF(message, time_taken, seed)
+        ddf.summary.append(hist)
+        
+
+"""
+NOTE: Should there be an option to scale back to a certain range of values?
+"""
+
+
+class FunctionTransform(Stainer):
+    """
+    Stainer that will transform a numerical column into one with a different distribution
+    
+    Degree:
+        Proportion of fixed_cols that will be transformed
+
+    Additional Args:
+        transformation (dictionary<function>):
+            List of possible transformations that will be randomly selected to be applied to the columns.
+            By default, the list of possible transformations will be set as
+            {square: x**2, cube: x**3, inverse: 1/x, ln: ln(x)}
+    """
+    def __init__(self, deg, fixed_col = "all", seed = None, transformation = "random"):
+        super().__init__("Variable Transform", deg, [], fixed_col, seed)
+        self.trans = transformation
+        if self.trans == "random":
+            self.trans = {"square": lambda x: x**2,
+                          "cube": lambda x: x**3,
+                          "1/x": lambda x: 1000 if x == 0 else round(1/x, 2),
+                          "ln": lambda x: 0 if x == 0 else round(np.log(x), 2)}
+
+    def transform(self, ddf, seed):
+        super().transform(ddf, seed)
+
+        start = time()
+
+        df = ddf.df
+        n_cols = df.shape[1]
+
+        if self.fixed_col == "all":
+            cols = [i for i in range(n_cols)]
+
+        rando_lst = sample(cols, int(n_cols * self.deg))
+
+        message = ""
+        
+        for col in rando_lst:
+            rando_func = choice(list(self.trans.keys()))
+            df.iloc[:, col] = df.iloc[:, col].apply(self.trans[rando_func])
+            message += f"Converted column {col} with transformation {rando_func}. \n"
+    
+        end = time()
+        time_taken = end - start
+        
+        if ddf.history:
+            hist = HistoryDF(message, time_taken, seed, ddf.df.copy())
+        else:
+            hist = HistoryDF(message, time_taken, seed)
+        ddf.summary.append(hist)
+        
+
+        
+        
+        
+        
+        
+        
