@@ -19,8 +19,7 @@ class DirtyDF():
     Attributes:
         summary (list<HistoryDF>):
             Contains the sequences and descriptions of each action. If history was set to True, will also
-            store the DataFrame
-        
+            store the DataFrame        
     """
     def __init__(self, df, history = False, verbose = 1):
         self.df = df.copy()
@@ -35,10 +34,8 @@ class DirtyDF():
         Ideally, this would export some file that will contain the summary of the whole process.
         But for now, returns the actions of each of the actions taken
         """
-        return list(map(lambda x: x.action, self.summary))
+        print("\n".join(list(map(lambda x: x.action, self.summary))))
         
-        
-
         
 # If want to store any other useful attributes after each step, could do it here also
 # E.g. If want to store time taken
@@ -149,7 +146,7 @@ class Combiner():
         """
         if not seed:
             seed = round(time() * 10)
-
+        
         for stain in self.stainers:
             try:
                 stain.transform(ddf, seed)
