@@ -76,9 +76,11 @@ class Combiner():
         seed (int):
             Only relevant if random_order set to True
             Determines seed for order of stainers
+        shuffle (boolean):
+            Boolean to determine if row order should be randomized after all staining
     """
     
-    def __init__(self, stainers, random_order = False, seed = None):
+    def __init__(self, stainers, random_order = False, seed = None, shuffle = False):
         if seed:
             self.seed = seed
         else:
@@ -92,11 +94,10 @@ class Combiner():
             if not self.check_valid(stainers):
                 raise Exception("Invalid sequence of stainers")
 
+        self.shuffle = shuffle
+
     def get_ordering_seed(self):
         return self.seed
-    
-    def get_finalDDF(self):
-        return self.ddf
     
     def random_stain(self):
         rseed(self.seed)
@@ -154,4 +155,6 @@ class Combiner():
                 print(f"{stain.style} not implemented")
 #             except Exception as e: # Removed now to assist debugging
 #                 print(f"ERROR: {e}. Skipping {stain.style}")
+        if self.shuffle:
+            ddf.df = ddf.df.sample(frac=1).reset_index(drop=True)
         return ddf
