@@ -2,15 +2,18 @@ import pandas as pd
 import numpy as np
 
 
-class Ddf(pd.DataFrame):
-    _metadata = ['stainer_list']
+class DirtyDataFrame:
+    """An object to dirty data frames.
 
-    stainer_list = []
+    df: A pandas DataFrame
+    stainer_list: A list of stainers. Stainers are functions 
+                  that take in a data frame and return a data 
+                  frame.
+    """
 
-    @property
-    def _constructor(self):
-        return Ddf
-
+    def __init__(self, df, stainer_list=[]):
+        self.org_df = df
+        self.stainer_list = stainer_list
  
     def my_func(self, str1):
         self.stainer_list.append(str1)
@@ -20,4 +23,7 @@ class Ddf(pd.DataFrame):
         pass
 
     def list_stainers(self):
+        pass
+
+    def attach_stainer(self, f):
         pass
