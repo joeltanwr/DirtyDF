@@ -10,16 +10,17 @@ class DirtyDataFrame:
     df: A pandas DataFrame
     stainer_list: A list of stainers. Stainers are functions 
                   that take in a data frame and return a data 
-                  frame.
+                  frame. They could also take in a random number 
+                  generator object.
     """
 
-    def __init__(self, df, stainer_list=[]):
+    def __init__(self, df):
         if isinstance(df, pd.DataFrame):
             self.org_df = df
         else:
             raise TypeError('df should be pandas DataFrame')
 
-        self.stainer_list = stainer_list
+        self.stainer_list = []
  
     def dirty(self, stain_order=None, seed=42):
         pass
@@ -27,8 +28,8 @@ class DirtyDataFrame:
     def list_stainers(self):
         pass
 
-    def attach_stainer(self, f0, **kwargs):
-        f1 = partial(f0, **kwargs)
+    def attach_stainer(self, f0, **stainer_args):
+        f1 = partial(f0, **stainer_args)
         self.stainer_list.append(f1)
 
     def check_order(self):
