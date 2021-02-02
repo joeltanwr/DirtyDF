@@ -133,3 +133,63 @@ class AddDuplicate(Stainer):
         else:
             hist = HistoryDF(message, time_taken, seed)
         ddf.summary.append(hist)  
+
+        
+#wishful thinking: assumes some datetime equivalent for latlong has been coded.
+class GeoFormatStainer(Stainer):
+    """
+    Stainer to alter the format of geospatial coordinates for given latlong columns.
+    
+    fixed_col:
+        Columns to perform geo format staining on.
+    num_format:
+        Number of geo formats present within each column.
+    formats:
+        List of geo string format options that the GeoFormatStainer chooses from.
+    """
+    def __init__(self, fixed_col, seed = None, num_format = 2, formats = None):
+        super().__init__("Staining geo formats", 0, [], fixed_col, seed)
+        if formats:
+            self.formats = formats
+        else:
+            self.formats = ["DMS", "MinDec", "DegDec"]
+            
+        if num_format > len(self.formats):
+            raise InputError(f"Cannot have num_format be more than the number of formats options, which is {len(self.formats)}.")
+        if num_format < 1:
+            raise InputError(f"Cannot have num_format be less than 1.")
+        self.num_format = num_format
+        
+    def transform(self, ddf, seed):
+        super().transform(ddf, seed)
+        
+        temp_df = ddf.df.copy()
+        start = time()
+        nrow = temp_df.shape[0]
+        
+        #iterate over each column in fixed_col
+        for col in self.fixed_col:
+            # to-do: add error check for if col is of 'geo' type
+            
+            new_col = temp_df[col].copy() #initiate copy of col which will be used to replace the existing one
+            random_idxs = np.array_split(np.random.choice(nrow, size=nrow, replace=False), num_format) #random indices to split dataframe by
+            randomized_formats = random.shuffle(self.formats.copy()) #randomized list of formats
+            
+            for i in range(num_format):
+                new_col.iloc[random_idxs[i]] = ddf.df[col].iloc[random_idxs[i],].apply(lambda x: x.strfgeo(randomized_formats[i]))
+                #for each set of random indices, apply a different strfgeo format
+            
+            temp_df[col] = new_col
+    
+        ddf.df = temp_df
+
+        end = time()
+        time_taken = end - start
+        
+        message = f"Changed the format of the following geo columns: {fixed_col}. For each column, a maximum of {self.num_format} " + \
+                  "formats were used."
+        if ddf.history:
+            hist = HistoryDF(message, time_taken, seed, ddf.df.copy())
+        else:
+            hist = HistoryDF(message, time_taken, seed)
+        ddf.summary.append(hist)
