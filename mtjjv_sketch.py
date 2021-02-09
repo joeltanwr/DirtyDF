@@ -34,17 +34,12 @@ class DirtyDF:
     # Store DF
     # Store stainer list
     # Store history
-    def __init__(self, df, rng = None, cat_cols = []):
+    def __init__(self, df, cat_cols = []):
         if isinstance(df, pd.DataFrame):
             self.df = df
             self.orig_df = df
         else:
             raise TypeError('df should be pandas DataFrame')
-
-        if rng:
-            self.rng = rng
-        else:
-            self.rng = default_rng(int(time() * 100 % (2**32 - 1)))
             
         self.stainers = []
         self.history = []
@@ -61,9 +56,6 @@ class DirtyDF:
     # Getters 
     def get_df(self):
         return self.df
-
-    def get_rng(self):
-        return self.rng
 
     def get_col_name(self, orig_idx = None, curr_idx = None):
         if orig_idx == None and curr_idx == None:
@@ -113,9 +105,13 @@ class DirtyDF:
         pass
     
     # Methods
-    def run_stainer(self, idx = 0):
+    def run_stainer(self, rng = None, idx = 0):
+        if not rng:
+            rng = default_rng(int(time() * 100 % (2**32 - 1)))
+            print(f"Random Generator Object with seed {rng}")
+            
         stainer = self.stainers[idx]
-        new_df, history = stainer.transform(self)
+        new_df, history = stainer.transform(self, rng)
         new_ddf = self.copy()
 
         new_ddf.df = new_df.copy()
@@ -124,10 +120,14 @@ class DirtyDF:
         return new_ddf
                 
 
-    def run_all_stainers(self):
+    def run_all_stainers(self, rng = None):
+        if not rng:
+            rng = default_rng(int(time() * 100 % (2**32 - 1)))
+            print(f"Random Generator Object with seed {rng}")
+            
         current_ddf = self.df
         for stainer in self.stainers:
-            current_ddf = self.run_stainer(current_ddf)
+            current_ddf = self.run_stainer(current_ddf, rng)
         return current_ddf
 
     # Copy
