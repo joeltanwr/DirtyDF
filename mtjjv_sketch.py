@@ -1,163 +1,107 @@
 import pandas as pd
-from pandas.api.types import is_numeric_dtype, is_datetime64_any_dtype, is_categorical_dtype
 from numpy.random import default_rng
+from time import time
+from stainer_new import *
 
-"""
-Difficulty:
-Stainer class requires user to fill in the map
-
-Need to confirm how the RNG object works
-"""
+def get_relevant_col_types(df, dtype):
+    pass
 
 class DirtyDF:
-    """
-    Available attributes:
-    df
-    orig_df         Original dataframe
-    stainers        List of stainers
-    history         List of History objects (past actions)
-    col_names_dict  col number -> col name (updated to newest df)
-    row_map         old row numbers -> new row numbers
-    col_map         old col numbers -> new col numbers
-    cat_cols        List of categorical columns (names)
-    num_cols        List of numerical columns (names)
-    dt_cols         List of datetime columns (names)
-
-    Available methods:
-    get_df
-    describe_stainers
-    addStainer
-    
-    dirty
-    copy
-    """
-    # Store DF
-    # Store stainer list
-    # Store history
-    def __init__(self, df, cat_cols = []):
-        if isinstance(df, pd.DataFrame):
-            self.df = df
-            self.orig_df = df
-        else:
-            raise TypeError('df should be pandas DataFrame')
-            
-        self.stainers = []
-        self.history = []
-        self.col_names_dict = dict(enumerate(df.columns))
+    def __init__(self, df, seed = None, copy = False):
+        self.df = df
         
-        self.row_map = {i: i for i in range(df.shape[0])}
-        self.col_map = {i: i for i in range(df.shape[0])}
+        if not copy:
+            if not seed:
+                self.seed = int(time() * 100 % (2**32 - 1))
+            else:
+                self.seed = seed
 
-        self.cat_cols = list(map(lambda x: col_map[x] if type(x) == int else x, cat_cols))
-        self.cat_cols.extend(list(filter(lambda x: is_categorical_dtype(df[x]), df.columns)))
-        self.num_cols = [col for col in df.columns if is_numeric_dtype(df[col]) and col not in cat_cols]
-        self.dt_cols = [col for col in df.columns if is_datetime64_any_dtype(df[col]) and col not in cat_cols]
-
-    # Getters 
+            self.rng = default_rng(self.seed)
+            self.stainers = []
+            self.row_map = {i: i for i in range(df.shape[0])}
+            self.col_map = {i: i for i in range(df.shape[1])}
+            self.history = [] 
+    
     def get_df(self):
         return self.df
-
-    def get_col_name(self, orig_idx = None, curr_idx = None):
-        if orig_idx == None and curr_idx == None:
-            raise ValueError("Need to provide index number of column to index")
-        elif orig_idx != None and curr_idx != None:
-            raise ValueError("Only should provide one argument")
-        else:
-            idx = orig_idx if orig_idx != None else curr_idx
-            try:
-                if orig_idx != None:
-                    return self.col_names_dict[self.col_map[orig_idx]]
-                return self.col_names_dict[curr_idx]
-            except:
-                raise TypeError("Index should be an integer")
-
-        
-    def categorical_cols(self):
-        return self.cat_cols
-
-    def numerical_cols(self):
-        return self.num_cols
-
-    def date_cols(self):
-        return self.dt_cols
-
+    
+    def get_seed(self):
+        return self.seed
+    
+    def get_rng(self):
+        return self.rng
+    
+    def reset_rng(self):
+        self.rng = default_rng(self.seed)
+    
     # Print methods
     def summarise_stainers(self):
+        """ Will likely depend on some other method within Stainer """
         pass
     
-    # Setters
     def __add_history__(self, hist):
-        if isinstance(df, History):
+        if isinstance(hist, History):
             self.history.append(hist)
         else:
             raise TypeError('hist should be History object')
-
-    def add_stainer(self, stainer):
-        if isinstance(df, Stainer):
-            self.stainers.append(stainer)
+    
+    def add_stainers(self, stainer, use_orig_row = True, use_orig_col = True):
+        ddf = self.copy()
+        if isinstance(stainer, Stainer):
+            ddf.stainers.append((stainer, use_orig_row, use_orig_col))
         else:
-            raise TypeError('stainer should be Stainer object')
-
+            for st in stainer:
+                ddf.stainers.append((st, use_orig_row, use_orig_col))
+        
+        return ddf
+        
     def reindex_stainers(self, new_order):
         """
         Reorder stainers
         """
         pass
     
-    # Methods
-    def run_stainer(self, rng = None, idx = 0):
-        if not rng:
-            rng = default_rng(int(time() * 100 % (2**32 - 1)))
-            print(f"Random Generator Object with seed {rng}")
-            
-        stainer = self.stainers[idx]
-        new_df, history = stainer.transform(self, rng)
-        new_ddf = self.copy()
-
-        new_ddf.df = new_df.copy()
-        new_ddf.__add_history__(history)
-        new_ddf.stainers.pop(0)
-        return new_ddf
-                
-
-    def run_all_stainers(self, rng = None):
-        if not rng:
-            rng = default_rng(int(time() * 100 % (2**32 - 1)))
-            print(f"Random Generator Object with seed {rng}")
-            
-        current_ddf = self.df
+    def run_stainer(self, idx = 0):
+        ddf = self.copy()
+        stainer, use_orig_row, use_orig_col = ddf.stainers.pop(idx)
+        
+        row, col = stainer.get_indices()
+        
+        n_row, n_col = self.df.shape
+        
+        if not row:
+            row = [i for i in range(n_row)]
+        if not col:
+            col = [i for i in range(n_col)]
+        
+        if not use_orig_row:
+            row = list(map(lambda x: self.row_map[x], row))
+        if not use_orig_col:
+            col = list(map(lambda x: self.col_map[x], col))      
+        
+        res = stainer.transform(self.df, self.rng, row, col)
+        
+        try:
+            new_df, row_map, col_map = res
+        except:
+            raise Exception("Need to enter a row_map and col_map. If no rows or columns were added/deleted, enter an empty dictionary")
+        
+        ddf.__add_history__(stainer.get_history())
+        ddf.df = new_df
+        return ddf
+    
+    def run_all_stainers(self, rng = None):        
+        current_ddf = self
         for stainer in self.stainers:
-            current_ddf = self.run_stainer(current_ddf, rng)
+            current_ddf = current_ddf.run_stainer()
         return current_ddf
 
-    # Copy
     def copy(self):
-        new_ddf = DirtyDF(self.df.copy(), rng = self.rng, cat_cols = self.cat_cols)
+        new_ddf = DirtyDF(self.df.copy(), copy = True)
+        new_ddf.seed = self.seed
+        new_ddf.rng = self.rng
         new_ddf.stainers = self.stainers.copy()
-        new_ddf.history = self.stainers.copy()
+        new_ddf.history = self.history.copy()
         new_ddf.row_map = self.row_map.copy()
         new_ddf.col_map = self.col_map.copy()
         return new_ddf
-        
-    
-
-class History:
-    """
-    How to format this?
-    Should probably contain action + new mapping 
-    """
-    pass
-
-        
-
-"""
-class Stainer
-
-
--- transform
-takes in some DDF
-Retrives the DF
-does manipulation
-
-returns a DF and History object
-"""
