@@ -2,9 +2,30 @@ import pandas as pd
 from numpy.random import default_rng
 from time import time
 from stainer_new import *
+from history import *
 
-def get_relevant_col_types(df, dtype):
-    pass
+"""
+Edits to implement:
+1. Column-types
+    Allow column-type interpretation for DDF
+    For each stainer, a (global) col_type attribute should be added.
+    In the DDF class, before a stainer is ran, the col_type should be queried and the DDF should
+        retrieve the relevant column types
+    This should then be checked against the stainer columns
+    Map the relevant columns then call the transform
+
+2. Function that will handle the mapping (Some sort of function that will trace back the ordering)
+
+3. reindex stainers
+    Reorder the stainer list into another ordering
+
+4. summarise_stainers
+
+5. randomize stainer order
+    Not too sure how important this is but may require some sanity checks if implemented
+
+6. Documentation
+"""
 
 class DirtyDF:
     def __init__(self, df, seed = None, copy = False):
@@ -39,11 +60,8 @@ class DirtyDF:
         """ Will likely depend on some other method within Stainer """
         pass
     
-    def __add_history__(self, hist):
-        if isinstance(hist, History):
-            self.history.append(hist)
-        else:
-            raise TypeError('hist should be History object')
+    def __add_history__(self, message, row_map, col_map):
+        self.history.append(History(message, row_map, col_map))
     
     def add_stainers(self, stainer, use_orig_row = True, use_orig_col = True):
         ddf = self.copy()
@@ -86,7 +104,7 @@ class DirtyDF:
         except:
             raise Exception("Need to enter a row_map and col_map. If no rows or columns were added/deleted, enter an empty dictionary")
         
-        ddf.__add_history__(stainer.get_history())
+        ddf.__add_history__(stainer.get_history(), row_map, col_map)
         ddf.df = new_df
         return ddf
     
