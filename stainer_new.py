@@ -37,7 +37,9 @@ class Stainer:
     
     def get_history(self):
         """ Creates a history object and returns it"""
-        return self.message
+        final = self.message
+        self.__initialize_history__()
+        return final
 
 class ShuffleStainer(Stainer):
     """ This description isn't complete""" 
