@@ -15,6 +15,7 @@ Edits to implement:
     Map the relevant columns then call the transform
 
 2. Function that will handle the mapping (Some sort of function that will trace back the ordering)
+    - DONE
 
 3. reindex stainers
     Reorder the stainer list into another ordering
@@ -28,6 +29,9 @@ Edits to implement:
 """
 
 class DirtyDF:
+    """
+    row_map / col_map stores the initial --> current mapping ({original: end})
+    """
     def __init__(self, df, seed = None, copy = False):
         self.df = df
         
@@ -39,7 +43,7 @@ class DirtyDF:
 
             self.rng = default_rng(self.seed)
             self.stainers = []
-            self.row_map = {i: i for i in range(df.shape[0])}
+            self.row_map = {i: i for i in range(df.shape[0])} 
             self.col_map = {i: i for i in range(df.shape[1])}
             self.history = [] 
     
@@ -51,7 +55,24 @@ class DirtyDF:
     
     def get_rng(self):
         return self.rng
-    
+
+    def get_mapping(self, axis = 0):
+        if axis in (0, "row"):
+            return self.row_map
+        if axis in (1, "column"):
+            return self.col_map
+        raise Exception("Invalid axis parameter")
+
+    def get_map_from_history(self, index, axis = 0):
+        if axis in (0, "row"):
+            return self.history[index].get_row_map()
+        if axis in (1, "col"):
+            return self.history[index].get_col_map()
+        raise Exception("Invalid axis parameter")
+        
+    def get_previous_map(self, axis = 0):
+        return self.get_map_from_history(-1, axis)
+
     def reset_rng(self):
         self.rng = default_rng(self.seed)
     
@@ -103,8 +124,28 @@ class DirtyDF:
             new_df, row_map, col_map = res
         except:
             raise Exception("Need to enter a row_map and col_map. If no rows or columns were added/deleted, enter an empty dictionary")
+
+        # Default options
+        if not row_map:
+            row_map = {i: i for i in range(new_df.shape[0])}
+        if not col_map:
+            col_map = {i: i for i in range(new_df.shape[1])}
+
+        def new_mapping(original, new):
+            """
+            Given an old mapping and a one-step mapping, returns a mapping that connects the most
+            original one to the final mapping 
+            """
+            o_dict = original.items()
+            o_key = list(map(lambda x: x[0], o_dict))
+            o_val = list(map(lambda x: x[1], o_dict))
+
+            return dict(zip(o_key, map(lambda x: new[x], o_val)))
+
+        ddf.row_map = new_mapping(self.row_map, row_map)
+        ddf.col_map = new_mapping(self.col_map, col_map)
         
-        ddf.__add_history__(stainer.get_history(), row_map, col_map)
+        ddf.__add_history__(stainer.get_history(), row_map, col_map) # This stores the -1 mapping
         ddf.df = new_df
         return ddf
     
