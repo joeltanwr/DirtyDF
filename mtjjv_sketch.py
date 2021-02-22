@@ -1,6 +1,7 @@
 import pandas as pd
 from numpy.random import default_rng
 from time import time
+from functools import reduce
 from stainer_new import *
 from history import *
 
@@ -30,7 +31,8 @@ Edits to implement:
 
 class DirtyDF:
     """
-    row_map / col_map stores the initial --> current mapping ({original: end})
+    row_map / col_map stores the initial -> current mapping (row are the old, cols are new)
+        1 represents a map; 0 o/w
     """
     def __init__(self, df, seed = None, copy = False):
         self.df = df
@@ -43,8 +45,8 @@ class DirtyDF:
 
             self.rng = default_rng(self.seed)
             self.stainers = []
-            self.row_map = {i: i for i in range(df.shape[0])} 
-            self.col_map = {i: i for i in range(df.shape[1])}
+            self.row_map = np.eye(df.shape[0])
+            self.col_map = np.eye(df.shape[1])
             self.history = [] 
     
     def get_df(self):
@@ -80,6 +82,9 @@ class DirtyDF:
     def summarise_stainers(self):
         """ Will likely depend on some other method within Stainer """
         pass
+
+    def print_history(self):
+        tuple(map(lambda x: print(self.history.index(x) + 1, x, sep = ". "), self.history))
     
     def __add_history__(self, message, row_map, col_map):
         self.history.append(History(message, row_map, col_map))
@@ -114,33 +119,38 @@ class DirtyDF:
             col = [i for i in range(n_col)]
         
         if not use_orig_row:
-            row = list(map(lambda x: self.row_map[x], row))
+            row = reduce(lambda x, y: np.concatenate([x, y]).reshape(-1), \
+                         map(lambda x: np.nonzero(self.row_map[x]), row))
         if not use_orig_col:
-            col = list(map(lambda x: self.col_map[x], col))      
+            col = reduce(lambda x, y: np.concatenate([x, y]).reshape(-1), \
+                         map(lambda x: np.nonzero(self.col_map[x]), col))
         
         res = stainer.transform(self.df, self.rng, row, col)
         
         try:
             new_df, row_map, col_map = res
         except:
-            raise Exception("Need to enter a row_map and col_map. If no rows or columns were added/deleted, enter an empty dictionary")
+            raise Exception("Need to enter a row_map and col_map. If no rows or columns were added/deleted, enter an empty list")
 
         # Default options
-        if not row_map:
-            row_map = {i: i for i in range(new_df.shape[0])}
-        if not col_map:
-            col_map = {i: i for i in range(new_df.shape[1])}
+        if not len(row_map):
+            row_map = np.eye(new_df.shape[0])
+        if not len(col_map):
+            col_map = np.eye(new_df.shape[1])
 
         def new_mapping(original, new):
             """
             Given an old mapping and a one-step mapping, returns a mapping that connects the most
             original one to the final mapping 
             """
-            o_dict = original.items()
-            o_key = list(map(lambda x: x[0], o_dict))
-            o_val = list(map(lambda x: x[1], o_dict))
-
-            return dict(zip(o_key, map(lambda x: new[x], o_val)))
+            final_map = np.zeros((len(original), len(new[0])))
+            for i in range(len(original)):
+                initial_map = np.nonzero(original[i])[0]
+                new_idx = reduce(lambda x, y: np.concatenate([x,y]).reshape(-1),
+                             map(lambda x: np.nonzero(new[x])[0], initial_map))
+                if len(new_idx):
+                    final_map[i][new_idx] = 1
+            return final_map
 
         ddf.row_map = new_mapping(self.row_map, row_map)
         ddf.col_map = new_mapping(self.col_map, col_map)
