@@ -97,6 +97,7 @@ class ShuffleStainer(Stainer):
 class InflectionStainer(Stainer):
     """
     Stainer to introduce random inflections (capitalization, case format, pluralization) to given categorical columns.
+
     Parameters:
         name (str):
             Name of stainer.
@@ -108,12 +109,12 @@ class InflectionStainer(Stainer):
             If dict: maps each col_idx to list of ignored category strings for that particular column.
         num_format (int):
             Number of inflection formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
-        formats (str list, or 'all'):
+        formats (str list, or None):
             List of inflection format options to chooses from. Choose from 'original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 
             'singularize', 'dasherize', 'humanize', 'titleize', and 'underscore'.
-            If all inflection formats are desired, then input 'all'.
+            If None, all inflections are used.
     """
-    def __init__(self, col_idx, name="Inflection", ignore_cats = [], num_format = -1, formats = ['original', 'uppercase', 'lowercase']):
+    def __init__(self, col_idx, name="Inflection", ignore_cats = [], num_format = -1, formats = None):
         super().__init__(name, [], col_idx)
         self.num_format = num_format
         
@@ -125,11 +126,11 @@ class InflectionStainer(Stainer):
         else:
             raise TypeError("ignore_cats must be either a list of strings, or a dictionary mapping column index to list of strings")
 
-        if formats == 'all':
-            self.formats = ['original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize',
-                'titleize', 'underscore']
-        else:
+        if formats:
             self.formats = formats
+        else:
+            self.formats = ['original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize',
+                'titleize', 'underscore'] #default formats; 10 total inflections + original
 
     
     """
@@ -141,7 +142,7 @@ class InflectionStainer(Stainer):
             
     Returns a set of strings, one for each inflection format in formats.
     """
-    def get_inflected_strings(self, x, formats):
+    def _get_inflected_strings(self, x, formats):
         import inflection
 
         default_format_map = {
@@ -166,7 +167,6 @@ class InflectionStainer(Stainer):
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
-        nrow = new_df.shape[0]
         
         #iterate over each column index
         for j in col_idx:
@@ -186,7 +186,7 @@ class InflectionStainer(Stainer):
                 if j in self.ignore_cats.keys() and cat in self.ignore_cats[j]: #ignore this category
                     new_col_lst.append(sub_col)
                 else:
-                    cat_inflection_formats = self.get_inflected_strings(cat, subformats) #set of inflected strings for this category
+                    cat_inflection_formats = self._get_inflected_strings(cat, subformats) #set of inflected strings for this category
                     
                     new_col_lst.append(
                         pd.Series(rng.choice(list(cat_inflection_formats), size = sub_col.shape[0]), index=sub_col.index)
@@ -198,3 +198,127 @@ class InflectionStainer(Stainer):
         self.update_history("Category inflections", end - start)
         return new_df, {}, {}
 
+class DateFormatStainer(Stainer):
+    """
+    Stainer to alter the format of dates for given date columns.
+    
+    Parameters:
+        name (str):
+            Name of stainer.
+        col_idx (int list):
+            Columns to perform date stainer on. Must be specified.
+        num_format (int):
+            Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
+        formats (str list or None):
+            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
+            a default list of 41 non-ambiguous (month is named) date formats are provided.
+    """
+    def __init__(self, col_idx, name="Date Formats", num_format = 2, formats = None):
+        import itertools
+        
+        super().__init__(name, [], col_idx)
+        self.num_format = num_format
+
+        if formats:
+            self.formats = formats
+        else:
+            self.formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
+                                for m_type in ["%b", "%B"]
+                                for d_m in itertools.permutations(["%d", m_type])
+                                for d_m_str in [f"{d_m[0]}{br}{d_m[1]}"]
+                                for dm_y in itertools.permutations([d_m_str, '%Y'])
+                           ] + ['%Y%m%d'] #default formats; 41 total and non-ambiguous
+            
+        
+    def transform(self, df, rng, row_idx = None, col_idx = None):
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+
+        start = time()
+        nrow = new_df.shape[0]
+        
+        #iterate over each column index
+        for j in col_idx:
+            new_col = df.iloc[:, j].copy() #instantiate a copy of this column which will be used to replace the existing one in new_df
+            if self.num_format == -1 or self.num_format > len(self.formats):
+                subformats = self.formats #use all formats
+            else:
+                subformats = rng.choice(self.formats, size=self.num_format, replace=False) #randomly select num_format formats from self.formats to be used for this column
+            
+            random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
+            
+            for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
+                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x.strftime(subformats[i]))
+                #for each set of random indices, apply a different strftime format
+
+            new_df.iloc[:, j] = new_col
+    
+        end = time()
+        self.update_history("Date Formats", end - start)
+        return new_df, {}, {}
+
+class DateSplitStainer(Stainer):
+    """
+    Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year. 
+    If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'.
+    If a column is split, the original column will be dropped.
+    For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively. 
+    
+    Parameters:
+        name (str):
+            Name of stainer.
+        col_idx (int list):
+            date columns to perform date splitting on. Must be specified.
+        prob:
+            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
+    """
+    def __init__(self, col_idx, name="Date Split", prob=1.0):
+        super().__init__(name, [], col_idx)
+
+        if prob < 0 or prob > 1:
+            raise ValueError("prob is a probability, it must be in the range [0, 1].")
+        else:
+            self.prob = prob
+        
+    def transform(self, df, rng, row_idx = None, col_idx = None):
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+
+        start = time()
+        
+        message = f"Split the following date columns: "
+        
+        splitted_log = [] #log of split date column indices
+        
+        #iterate over each column index
+        for j in self.col_idx:
+            if rng.random() > self.prob:
+                continue #probability that the stainer doesn't split this column
+            
+            col_name = df.columns[j]
+            message += f"{col_name}, "
+            splitted_log.append(j)
+            
+            #check to ensure no undetected column name conflict
+            if f"{col_name}_day" in new_df.columns:
+                raise KeyError(f"column name: '{col_name}_day' already exists in dataframe.")
+            if f"{col_name}_month" in new_df.columns:
+                raise KeyError(f"column name: '{col_name}_month' already exists in dataframe.")
+            if f"{col_name}_year" in new_df.columns:
+                raise KeyError(f"column name: '{col_name}_year' already exists in dataframe.")
+
+            new_df[f"{col_name}_day"] = new_df[col_name].apply(lambda x: x.strftime("%d"))
+            new_df[f"{col_name}_month"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%m", "%B", "%b"])))
+            new_df[f"{col_name}_year"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%Y", "%y"])))
+            new_df.drop(col_name, axis = 1, inplace = True)
+        
+        if len(splitted_log) == 0:
+            message = "No date columns were split."
+        else:
+            message = message[:-2]
+            
+        col_map = np.zeros((df.shape[1], new_df.shape[1]))
+
+        #to-do: update col_map, not sure how
+
+        end = time()
+        self.update_history(message, end - start)
+        return new_df, {}, col_map
