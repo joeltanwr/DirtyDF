@@ -68,6 +68,29 @@ class Stainer:
         self.__initialize_history__()
         return self.name, msg, time
 
+    @staticmethod
+    def convert_mapper_dct_to_array(dct):
+        '''
+        Helper function to convert a mapper in dict form to numpy array. Useful when the final number of columns is unknown before stainer transformation.
+
+        Parameters
+        ----------
+        dct: dictionary of {index: list of indices}
+            the mapper in dict form
+
+        Returns
+        -------
+        np.array
+            the mapper in array form (required for Stainer output) 
+        '''
+        input_size = len(dct.keys())
+        output_size = max([j for v in dct.values() for j in v]) #output size is the maximal index in dct values
+        col_map = np.zeros(input_size, output_size) #initialize column map array
+        for i,v in dct.items():
+            for j in v:
+                col_map[i,j] = 1 #update column map array
+        return col_map
+
 class ShuffleStainer(Stainer):
     """ This description isn't complete """ 
     
@@ -286,42 +309,53 @@ class DateSplitStainer(Stainer):
         
         message = f"Split the following date columns: "
         
+        col_map_dct = dict() #initialize column map dictionary; new number of columns is unknown at start.
         splitted_log = [] #log of split date column indices
         
-        #iterate over each column index
-        for j in self.col_idx:
-            if rng.random() > self.prob:
-                continue #probability that the stainer doesn't split this column
-            
-            col_name = df.columns[j]
-            message += f"{col_name}, "
-            splitted_log.append(j)
-            
-            #check to ensure no undetected column name conflict
-            if f"{col_name}_day" in new_df.columns:
-                raise KeyError(f"column name: '{col_name}_day' already exists in dataframe.")
-            if f"{col_name}_month" in new_df.columns:
-                raise KeyError(f"column name: '{col_name}_month' already exists in dataframe.")
-            if f"{col_name}_year" in new_df.columns:
-                raise KeyError(f"column name: '{col_name}_year' already exists in dataframe.")
+        #iterate over all columns, and apply logic only when current column index is in self.col_idx
+        for j in range(df.shape[1]):
+            if j in self.col_idx:
+                if rng.random() > self.prob:
+                    continue #probability that the stainer doesn't split this column
+                
+                col_name = df.columns[j]
+                message += f"{col_name}, "
+                splitted_log.append(j)
+                
+                #check to ensure no undetected column name conflict
+                if f"{col_name}_day" in new_df.columns:
+                    raise KeyError(f"column name: '{col_name}_day' already exists in dataframe.")
+                if f"{col_name}_month" in new_df.columns:
+                    raise KeyError(f"column name: '{col_name}_month' already exists in dataframe.")
+                if f"{col_name}_year" in new_df.columns:
+                    raise KeyError(f"column name: '{col_name}_year' already exists in dataframe.")
 
-            new_df[f"{col_name}_day"] = new_df[col_name].apply(lambda x: x.strftime("%d"))
-            new_df[f"{col_name}_month"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%m", "%B", "%b"])))
-            new_df[f"{col_name}_year"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%Y", "%y"])))
-            new_df.drop(col_name, axis = 1, inplace = True)
+                new_df[f"{col_name}_day"] = new_df[col_name].apply(lambda x: x.strftime("%d"))
+                new_df[f"{col_name}_month"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%m", "%B", "%b"])))
+                new_df[f"{col_name}_year"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%Y", "%y"])))
+                new_df.drop(col_name, axis = 1, inplace = True)
         
         if len(splitted_log) == 0:
             message = "No date columns were split."
         else:
             message = message[:-2]
-            
-        col_map = np.zeros((df.shape[1], new_df.shape[1]))
 
-        #to-do: update col_map, not sure how
+        col_map = Stainer.convert_mapper_dct_to_array(col_map_dct)
 
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, col_map
 
 class BinningStainer(Stainer):
-    pass
+    """
+    Stainer that bins each continuous column into discrete groups (each group represents a range).
+    The distribution    
+    
+    Parameters:
+        name (str):
+            Name of stainer.
+        col_idx (int list):
+            date columns to perform date splitting on. Must be specified.
+        prob:
+            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
+    """
