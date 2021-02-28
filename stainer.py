@@ -84,8 +84,8 @@ class Stainer:
             the mapper in array form (required for Stainer output) 
         '''
         input_size = len(dct.keys())
-        output_size = max([j for v in dct.values() for j in v]) #output size is the maximal index in dct values
-        col_map = np.zeros(input_size, output_size) #initialize column map array
+        output_size = max([j for v in dct.values() for j in v]) + 1 #output size is the maximal index in dct values + 1 (zero-indexing)
+        col_map = np.zeros((input_size, output_size)) #initialize column map array
         for i,v in dct.items():
             for j in v:
                 col_map[i,j] = 1 #update column map array
@@ -309,18 +309,17 @@ class DateSplitStainer(Stainer):
         
         message = f"Split the following date columns: "
         
-        col_map_dct = dict() #initialize column map dictionary; new number of columns is unknown at start.
-        splitted_log = [] #log of split date column indices
-        
+        col_map_dct = {j: [] for j in range(df.shape[1])} #initialize column map dictionary; new number of columns is unknown at start.
+        j_new = 0 #running column index for output df
+
         #iterate over all columns, and apply logic only when current column index is in self.col_idx
         for j in range(df.shape[1]):
-            if j in self.col_idx:
-                if rng.random() > self.prob:
-                    continue #probability that the stainer doesn't split this column
-                
+            if (j not in self.col_idx) or (rng.random() > self.prob): #current column index not in self.col_idx, or no split due to probability
+                col_map_dct[j].append(j_new)
+                j_new += 1
+            else:
                 col_name = df.columns[j]
                 message += f"{col_name}, "
-                splitted_log.append(j)
                 
                 #check to ensure no undetected column name conflict
                 if f"{col_name}_day" in new_df.columns:
@@ -329,13 +328,19 @@ class DateSplitStainer(Stainer):
                     raise KeyError(f"column name: '{col_name}_month' already exists in dataframe.")
                 if f"{col_name}_year" in new_df.columns:
                     raise KeyError(f"column name: '{col_name}_year' already exists in dataframe.")
+                
+                month_format = rng.choice(["%m", "%B", "%b"]) #randomly chosen month format
+                year_format = rng.choice(["%Y", "%y"]) #randomly chosen year format
 
-                new_df[f"{col_name}_day"] = new_df[col_name].apply(lambda x: x.strftime("%d"))
-                new_df[f"{col_name}_month"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%m", "%B", "%b"])))
-                new_df[f"{col_name}_year"] = new_df[col_name].apply(lambda x: x.strftime(rng.choice(["%Y", "%y"])))
-                new_df.drop(col_name, axis = 1, inplace = True)
+                new_df.drop(col_name, axis=1, inplace=True)
+                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x.strftime("%d")))
+                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x.strftime(month_format)))
+                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x.strftime(year_format)))
+                
+                col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
+                j_new += 3
         
-        if len(splitted_log) == 0:
+        if j == j_new - 1:
             message = "No date columns were split."
         else:
             message = message[:-2]
