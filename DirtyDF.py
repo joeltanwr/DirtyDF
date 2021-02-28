@@ -2,7 +2,7 @@ import pandas as pd
 from numpy.random import default_rng
 from time import time
 from functools import reduce
-from stainer_new import *
+from stainer import *
 from history import *
 
 """
