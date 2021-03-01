@@ -1,21 +1,9 @@
 from time import time
 import numpy as np
 import pandas as pd
+from itertools import product
 
-"""
-To-do:
-1. Fix initialisation of history so that it would reset upon creation of DDF
-    - DONE
-
-2A. AddDuplicate Stainer
-2B. Nullify Stainer
-2C. Function Stainer
-
-3. Currently updating history is only message. Will need to adjust more if
-want it to contain other information
-    - Included time
-"""
-
+# require inflection module for inflection stainer
 class Stainer:
     col_type = "all"
     
@@ -44,9 +32,9 @@ class Stainer:
         
         new_df = df.copy()
         
-        if not row_idx:
+        if not len(row_idx):
             row_idx = self.row_idx
-        if not col_idx:
+        if not len(col_idx):
             col_idx = self.col_idx
 
         return new_df, row_idx, col_idx
@@ -102,21 +90,77 @@ class ShuffleStainer(Stainer):
 
         start = time()
         # Shuffle + Create mapping
+        new_df["_extra_index_for_stainer"] = range(df.shape[0])
         new_df = new_df.sample(frac = 1, random_state = rng.bit_generator)
-        original_idx = new_df.index
-        new_df.reset_index(drop = True, inplace = True)
-        new_idx = new_df.index
-
+        new_idx = new_df["_extra_index_for_stainer"].tolist()
+        new_df.drop("_extra_index_for_stainer", axis = 1, inplace = True)
+        
         row_map = np.zeros((df.shape[0], df.shape[0]))
         for i in range(len(row_map)):
-            row_map[original_idx[i]][new_idx[i]] = 1
-        
+            row_map[new_idx[i]][i] = 1
         end = time()
         
         self.update_history("Order of rows randomized", end - start)
         
         return new_df, row_map, {}        
 
+class RowDuplicateStainer(Stainer):
+    """
+    Stainer to duplicate rows of a dataset.
+    deg (0, 1]:
+        Proportion of given data that would be duplicated.
+        Note: If 5 rows were specified and deg = 0.6, only 3 rows will be duplicated
+    max_rep (2/3/4/5):
+        Maximum number of times a row can appear after duplication. That is, if max_rep = 2, 
+        the original row was duplicated once to create 2 copies total.
+        Capped at 5 to conserve computational power
+    """  
+    def __init__(self, deg, max_rep = 2, name = "Add Duplicates", row_idx = []):
+        super().__init__(name, row_idx, [])
+        if deg <= 0 or deg > 1:
+            raise ValueError("Degree should be in range (0, 1]")
+        self.deg = deg
+        if max_rep not in [2, 3, 4, 5]:
+            raise ValueError("max_rep should be in range [2, 5]")
+        self.max_rep = max_rep
+
+    def transform(self, df, rng, row_idx = None, col_idx = None):
+        _, row, col = self._init_transform(df, row_idx, col_idx)
+        new_df = []
+        row_map = np.zeros((df.shape[0], int(df.shape[0] * self.deg * self.max_rep) + 1))
+        
+        start = time()
+        idx_to_dup = rng.choice(row, size = int(self.deg * df.shape[0]), replace = False)
+        idx_to_dup.sort()
+        
+        new_idx = 0
+
+        for old_idx, *row in df.itertuples():
+            if len(idx_to_dup) and old_idx == idx_to_dup[0]:
+                num_dup = rng.integers(2, self.max_rep, endpoint = True)
+                new_df.extend([list(row)] * num_dup)
+                for i in range(num_dup):
+                    row_map[old_idx][new_idx] = 1
+                    new_idx += 1
+                idx_to_dup = idx_to_dup[1:]
+            else:
+                new_df.append(list(row))
+                row_map[old_idx][new_idx] = 1
+                new_idx += 1
+
+        row_map = row_map[:, :new_idx]
+        
+        new_df = pd.DataFrame(new_df, columns = df.columns)
+        end = time()
+        
+        message = f"Added Duplicate Rows for {int(self.deg * df.shape[0])} rows. \n" + \
+                  f"  Each duplicated row should appear a maximum of {self.max_rep} times. \n" + \
+                  f"  Rows added: {new_df.shape[0] - df.shape[0]}"
+        
+        self.update_history(message, end - start)
+        
+        return new_df, row_map, {}
+    
 class InflectionStainer(Stainer):
     """
     Stainer to introduce random inflections (capitalization, case format, pluralization) to given categorical columns.
@@ -351,6 +395,8 @@ class DateSplitStainer(Stainer):
         self.update_history(message, end - start)
         return new_df, {}, col_map
 
+
+    
 class BinningStainer(Stainer):
     """
     Stainer that bins each continuous column into discrete groups (each group represents a range).
@@ -364,3 +410,4 @@ class BinningStainer(Stainer):
         prob:
             probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
+    pass
