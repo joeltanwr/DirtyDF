@@ -394,18 +394,3 @@ class DateSplitStainer(Stainer):
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, col_map
-
-class BinningStainer(Stainer):
-    """
-    Stainer that bins each continuous column into discrete groups (each group represents a range).
-    The distribution    
-    
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            date columns to perform date splitting on. Must be specified.
-        prob:
-            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
-    """
-    pass
