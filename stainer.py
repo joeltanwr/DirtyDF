@@ -353,14 +353,75 @@ class DateSplitStainer(Stainer):
 
 class BinningStainer(Stainer):
     """
-    Stainer that bins each continuous column into discrete groups (each group represents a range).
-    The distribution    
+    Stainer that bins continuous columns into discrete groups (each group represents an interval [a,b)).
     
     Parameters:
         name (str):
             Name of stainer.
         col_idx (int list):
-            date columns to perform date splitting on. Must be specified.
-        prob:
-            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
+            Columns to perform binning on. Must be specified.
+        group_size:
+            Number of elements in each interval group.
+        n_groups:
+            Number of groups to bin to. Ignored if either range or size is not None.
+        sf:
+            Number of significant digits to be used in the output string representation for the intervals.
     """
+    def __init__(self, col_idx, name="Binning", group_size=None, n_groups=5, sf=4):
+        super().__init__(name, [], col_idx)
+        self.type = type
+        self.range = range
+        self.group_size = group_size
+        self.n_groups = n_groups
+        self.sf = sf
+    
+    @staticmethod
+    def _bin_into_group(x, cutpoints):
+        """
+        Helper to bin decimal into the correct group.
+        """
+        #binary search for upper bound index, which is 'high'
+        low=0
+        high=len(cutpoints)-1
+        while low < high:
+            mid = low + (high - low) // 2
+            if x < cutpoints[mid]:
+                high = mid
+            else:
+                low = mid + 1
+
+        lower_bound = cutpoints[high - 1]
+        upper_bound = cutpoints[high]
+
+        if high == len(cutpoints) - 1: #last index, closed interval
+            return f"[{lower_bound}, {upper_bound}]"
+        else: #not last index, half-open interval
+            return f"[{lower_bound}, {upper_bound})"
+
+
+    def transform(self, df, rng, row_idx=None, col_idx=None):
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+
+        start = time()
+
+        #helper function to round to significant digits
+        def round_sig(x, sig=2):
+            return round(x, sig-int(np.floor(np.log10(abs(x))))-1)
+
+        #iterate over each column index
+        for j in col_idx:
+            new_col = df.iloc[:, j].copy() #instantiate a copy of this column which will be used to replace the existing one in new_df
+
+            if self.group_size:
+                n_groups = new_col.shape[0] // self.group_size
+            else:
+                n_groups = self.n_groups
+            
+            cutpoints = [round_sig(cp, self.sf) for cp in new_col.quantile([i/n_groups for i in range(n_groups + 1)], interpolation='lower').tolist()]
+
+            new_df.iloc[:, j] = new_col.apply(lambda x: self._bin_into_group(x, cutpoints))
+        
+        end = time()
+        self.update_history("Binning", end - start)
+        return new_df, {}, {}
+        
