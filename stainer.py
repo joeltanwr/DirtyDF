@@ -265,22 +265,22 @@ class InflectionStainer(Stainer):
         self.update_history("Category inflections", end - start)
         return new_df, {}, {}
 
-class DateFormatStainer(Stainer):
+class DatetimeFormatStainer(Stainer):
     """
-    Stainer to alter the format of dates for given date columns.
+    Stainer to alter the format of datetimes for given datetime columns.
     
     Parameters:
         name (str):
             Name of stainer.
         col_idx (int list):
-            Columns to perform date stainer on. Must be specified.
+            Columns to perform datetime stainer on. Must be specified.
         num_format (int):
-            Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
+            Number of datetime formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
         formats (str list or None):
-            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
-            a default list of 41 non-ambiguous (month is named) date formats are provided.
+            List of datetime string format options that the DatetimeFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). 
+            If None, a default list of 41 non-ambiguous (month is named) datetime formats are provided.
     """
-    def __init__(self, col_idx, name="Date Formats", num_format = 2, formats = None):
+    def __init__(self, col_idx, name="Datetime Formats", num_format = 2, formats = None):
         import itertools
         
         super().__init__(name, [], col_idx)
@@ -289,12 +289,12 @@ class DateFormatStainer(Stainer):
         if formats:
             self.formats = formats
         else:
-            self.formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
+            self.formats = [date + " %H:%M:%S" for date in [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
                                 for m_type in ["%b", "%B"]
                                 for d_m in itertools.permutations(["%d", m_type])
                                 for d_m_str in [f"{d_m[0]}{br}{d_m[1]}"]
                                 for dm_y in itertools.permutations([d_m_str, '%Y'])
-                           ] + ['%Y%m%d'] #default formats; 41 total and non-ambiguous
+                           ] + ['%Y%m%d']] #default formats; 41 total and non-ambiguous
             
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
@@ -322,6 +322,34 @@ class DateFormatStainer(Stainer):
         end = time()
         self.update_history("Date Formats", end - start)
         return new_df, {}, {}
+
+class DateFormatStainer(DatetimeFormatStainer):
+    """
+    Stainer to alter the format of dates for given date columns.
+    
+    Parameters:
+        name (str):
+            Name of stainer.
+        col_idx (int list):
+            Columns to perform date stainer on. Must be specified.
+        num_format (int):
+            Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
+        formats (str list or None):
+            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
+            a default list of 41 non-ambiguous (month is named) date formats are provided.
+    """
+    def __init__(self, col_idx, name="Date Formats", num_format = 2, formats = None):
+        import itertools
+        if formats == None:
+            formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
+                        for m_type in ["%b", "%B"]
+                        for d_m in itertools.permutations(["%d", m_type])
+                        for d_m_str in [f"{d_m[0]}{br}{d_m[1]}"]
+                        for dm_y in itertools.permutations([d_m_str, '%Y'])
+                    ] + ['%Y%m%d'] #default formats; 41 total and non-ambiguous
+
+        super().__init__(col_idx=col_idx, name=name, num_format=num_format, formats=formats)
+
 
 class DateSplitStainer(Stainer):
     """
@@ -394,18 +422,3 @@ class DateSplitStainer(Stainer):
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, col_map
-
-class BinningStainer(Stainer):
-    """
-    Stainer that bins each continuous column into discrete groups (each group represents a range).
-    The distribution    
-    
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            date columns to perform date splitting on. Must be specified.
-        prob:
-            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
-    """
-    pass
