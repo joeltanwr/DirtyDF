@@ -132,12 +132,12 @@ class DirtyDF:
             y = np.array(y).reshape(-1)
             return np.concatenate([x, y]).reshape(-1)
         if use_orig_row:
-            row = reduce(convert,
-                         map(lambda x: np.nonzero(self.row_map[x]), row))
+            row = list(map(int, reduce(convert,
+                         map(lambda x: np.nonzero(self.row_map[x]), row), ())))
         if use_orig_col:
-            col = reduce(convert, 
-                         map(lambda x: np.nonzero(self.col_map[x]), col))
-        
+            col = list(map(int, reduce(convert, 
+                         map(lambda x: np.nonzero(self.col_map[x]), col), ())))
+            
         col_type = stainer.get_col_type()
         if col_type == "all":
             col = col

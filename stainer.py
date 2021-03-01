@@ -32,9 +32,9 @@ class Stainer:
         
         new_df = df.copy()
         
-        if not len(row_idx):
+        if not row_idx:
             row_idx = self.row_idx
-        if not len(col_idx):
+        if not col_idx:
             col_idx = self.col_idx
 
         return new_df, row_idx, col_idx
@@ -395,8 +395,6 @@ class DateSplitStainer(Stainer):
         self.update_history(message, end - start)
         return new_df, {}, col_map
 
-
-    
 class BinningStainer(Stainer):
     """
     Stainer that bins each continuous column into discrete groups (each group represents a range).
