@@ -394,7 +394,7 @@ class DateSplitStainer(Stainer):
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, col_map
-
+    
 class FTransformStainer(Stainer):
     col_type = "numeric"
     function_dict = {"square": lambda x: x**2,
@@ -442,7 +442,7 @@ class FTransformStainer(Stainer):
                 new_col = std_dev * (orig_max - orig_min) + orig_min
                 new_df.iloc[:, col] = new_col
             
-            message += f"Converted column {col} with transformation {rando_func}. \n"
+            message += f"Converted column {col} with transformation {rando_func}. \n "
         
         end = time()
         self.update_history(message, end - start)
