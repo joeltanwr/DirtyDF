@@ -351,10 +351,11 @@ class DateFormatStainer(DatetimeFormatStainer):
         super().__init__(col_idx=col_idx, name=name, num_format=num_format, formats=formats)
 
 
-class DateSplitStainer(Stainer):
+class DatetimeSplitStainer(Stainer):
     """
     Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year. 
-    If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'.
+    If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'. If keep_time is True,
+    then further generate 'X_hour', 'X_minute', and 'X_second'.
     If a column is split, the original column will be dropped.
     For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively. 
     
@@ -363,11 +364,14 @@ class DateSplitStainer(Stainer):
             Name of stainer.
         col_idx (int list):
             date columns to perform date splitting on. Must be specified.
+        keep_time (boolean):
+            parameter to set whether time component of datetime should be kept, thus 3 new columns are created. Default is True.
         prob:
             probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
-    def __init__(self, col_idx, name="Date Split", prob=1.0):
+    def __init__(self, col_idx, name="Date Split", keep_time = True, prob=1.0):
         super().__init__(name, [], col_idx)
+        self.keep_time = keep_time
 
         if prob < 0 or prob > 1:
             raise ValueError("prob is a probability, it must be in the range [0, 1].")
@@ -411,7 +415,23 @@ class DateSplitStainer(Stainer):
                 
                 col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
                 j_new += 3
-        
+
+                if self.keep_time:
+                    #check to ensure no undetected column name conflict
+                    if f"{col_name}_hour" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_hour' already exists in dataframe.")
+                    if f"{col_name}_minute" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_minute' already exists in dataframe.")
+                    if f"{col_name}_second" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_second' already exists in dataframe.")
+
+                    new_df.insert(j_new, f"{col_name}_hour", df[col_name].apply(lambda x: x.strftime("%H")))
+                    new_df.insert(j_new + 1, f"{col_name}_minute", df[col_name].apply(lambda x: x.strftime("%M")))
+                    new_df.insert(j_new + 2, f"{col_name}_second", df[col_name].apply(lambda x: x.strftime("%S")))
+                    
+                    col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
+                    j_new += 3
+
         if j == j_new - 1:
             message = "No date columns were split."
         else:
