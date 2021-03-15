@@ -396,22 +396,24 @@ class DateSplitStainer(Stainer):
         return new_df, {}, col_map
 
 
-class GeoFormatStainer(Stainer):
+from latlong import Latlong
+
+class LatlongFormatStainer(Stainer):
     """
-    Stainer to alter the format of datetimes for given geospatial columns.
+    Stainer to alter the format of datetimes for given latlong columns.
     
     Parameters:
         name (str):
             Name of stainer.
         col_idx (int list):
-            Columns to perform geospatial stainer on. Must be specified.
+            Columns to perform latlong stainer on. Must be specified.
         num_format (int):
-            Number of geospatial formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
+            Number of latlong formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
         formats (str list or None):
-            List of datetime string format options that the GeoFormatStainer chooses from. Use  module string formats (e.g. '%d%b%Y'). 
-            If None, a default list of 41 non-ambiguous (month is named) datetime formats are provided.
+            List of datetime string format options that the LatlongFormatStainer chooses from. Use  module string formats. 
+            If None, a default list of formats are provided.
     """
-    def __init__(self, col_idx, name="Geospatial Formats", num_format = 2, formats = None):
+    def __init__(self, col_idx, name="Latlong Formats", num_format = 2, formats = None):
         import itertools
         
         super().__init__(name, [], col_idx)
@@ -420,12 +422,7 @@ class GeoFormatStainer(Stainer):
         if formats:
             self.formats = formats
         else:
-            self.formats = [date + " %H:%M:%S" for date in [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
-                                for m_type in ["%b", "%B"]
-                                for d_m in itertools.permutations(["%d", m_type])
-                                for d_m_str in [f"{d_m[0]}{br}{d_m[1]}"]
-                                for dm_y in itertools.permutations([d_m_str, '%Y'])
-                           ] + ['%Y%m%d']] #default formats; 41 total and non-ambiguous
+            self.formats = ['DMS', 'MinDec'] #default formats
             
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
@@ -445,11 +442,83 @@ class GeoFormatStainer(Stainer):
             random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
             
             for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
-                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x.strfgeo(subformats[i]))
-                #for each set of random indices, apply a different geo format
+                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x.strflatlong(subformats[i]))
+                #for each set of random indices, apply a different latlong format
 
             new_df.iloc[:, j] = new_col
     
         end = time()
-        self.update_history("Date Formats", end - start)
+        self.update_history("Latlong Formats", end - start)
         return new_df, {}, {}
+
+
+class LatlongSplitStainer(Stainer):
+    """
+    Stainer that splits each given latlong columns into 3 columns, representing degree, minute, and seconds.
+    If a given column's name is 'X', then the respective generated column names 'X_deg', 'X_min', and 'X_sec'.
+    If a column is split, the original column will be dropped.
+    
+    Parameters:
+        name (str):
+            Name of stainer.
+        col_idx (int list):
+            latlong columns to perform latlong splitting on. Must be specified.
+        prob:
+            probability that the stainer splits a latlong column. Probabilities of split for each given date column are independent.
+    """
+    def __init__(self, col_idx, name="Latlong Split", prob=1.0):
+        super().__init__(name, [], col_idx)
+
+        if prob < 0 or prob > 1:
+            raise ValueError("prob is a probability, it must be in the range [0, 1].")
+        else:
+            self.prob = prob
+        
+    def transform(self, df, rng, row_idx = None, col_idx = None):
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+
+        start = time()
+        
+        message = f"Split the following latlong columns: "
+        
+        col_map_dct = {j: [] for j in range(df.shape[1])} #initialize column map dictionary; new number of columns is unknown at start.
+        j_new = 0 #running column index for output df
+
+        #iterate over all columns, and apply logic only when current column index is in self.col_idx
+        for j in range(df.shape[1]):
+            if (j not in self.col_idx) or (rng.random() > self.prob): #current column index not in self.col_idx, or no split due to probability
+                col_map_dct[j].append(j_new)
+                j_new += 1
+            else:
+                col_name = df.columns[j]
+                message += f"{col_name}, "
+                
+                #check to ensure no undetected column name conflict
+                if f"{col_name}_day" in new_df.columns:
+                    raise KeyError(f"column name: '{col_name}_day' already exists in dataframe.")
+                if f"{col_name}_month" in new_df.columns:
+                    raise KeyError(f"column name: '{col_name}_month' already exists in dataframe.")
+                if f"{col_name}_year" in new_df.columns:
+                    raise KeyError(f"column name: '{col_name}_year' already exists in dataframe.")
+                
+                month_format = rng.choice(["%m", "%B", "%b"]) #randomly chosen month format
+                year_format = rng.choice(["%Y", "%y"]) #randomly chosen year format
+
+                new_df.drop(col_name, axis=1, inplace=True)
+                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x.strftime("%d")))
+                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x.strftime(month_format)))
+                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x.strftime(year_format)))
+                
+                col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
+                j_new += 3
+        
+        if j == j_new - 1:
+            message = "No date columns were split."
+        else:
+            message = message[:-2]
+
+        col_map = Stainer.convert_mapper_dct_to_array(col_map_dct)
+
+        end = time()
+        self.update_history(message, end - start)
+        return new_df, {}, col_map
