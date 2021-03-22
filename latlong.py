@@ -25,7 +25,59 @@ class Latlong:
         else:
             return f"{x:.{num_decimal}f}"
 
-    def strfgeo(self, format):
+    @staticmethod
+    def df_to_latlong(df, lat_idx, long_idx):
+        """
+        Convert lat and long columns in a pandas dataframe to a single Latlong column. Returns the Latlong column without altering the dataframe.
+
+        Parameters
+        ----------
+        df : pandas dataframe
+            the dataframe to extract Latlong column from
+        lat_idx : integer
+            the index of the decimal latitude column in the dataframe
+        long_idx : integer
+            the index of the decimal longitude column in the dataframe
+
+        Returns
+        -------
+        pd.Series
+           the series describing the Latlong column
+        """
+        return df.apply(lambda x: Latlong(x[lat_idx], x[long_idx]))
+
+
+    def strflatlong(self, format):
+        """
+        Convert a latlong object to string based on given user format.
+
+        Parameters
+        ----------
+        format : string
+            the string latlong format to be used.
+
+            Format uses the following notations: %<base><num_decimals><lat / long>
+                Base:
+                - %D - degree w/ sign (integer (rounded down) if not followed by a number, else decimal)
+                - %d - degree w/o sign (integer (rounded down) if not followed by a number, else decimal)
+                - %c - N, S, W, or E
+                - %m - minutes (integer (rounded down) if not followed by a number, else decimal)
+                - %s - seconds (integer (rounded down) if not followed by a number, else decimal)
+
+                Specification for lat/long & number of decimals:
+                - %x{n} - x up to n decimals (e.g. %s2 for seconds up to 2 decimals)
+                - %xa - to specify x for latitude (e.g. %s2a for latitude seconds up to 2 decimals)
+                - %xo - to specify x for longitude (e.g. %m3o for longitude minutes up to 3 decimals)
+
+            There are also special pre-defined format strings which can be used:
+                'DMS': Standard DMS format
+                'MinDec': Degrees (integer) and Minutes (real number)
+
+        Returns
+        -------
+        string
+            the latlong string format.
+        """
         d_lat, m_lat, s_lat, sgn_lat = Latlong.deg_to_dms(self.lat, type='lat')
         d_long, m_long, s_long, sgn_long = Latlong.deg_to_dms(self.long, type='long')
         
