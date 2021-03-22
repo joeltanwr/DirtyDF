@@ -330,13 +330,14 @@ class DateSplitStainer(Stainer):
     If a column is split, the original column will be dropped.
     For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively. 
     
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            date columns to perform date splitting on. Must be specified.
-        prob:
-            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
+    Parameters
+    ----------
+    name : string
+        name of stainer.
+    col_idx : int list
+        date columns to perform date splitting on. Must be specified.
+    prob: float in range [0, 1]
+        probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
     def __init__(self, col_idx, name="Date Split", prob=1.0):
         super().__init__(name, [], col_idx)
