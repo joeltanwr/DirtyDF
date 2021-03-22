@@ -410,7 +410,7 @@ class LatlongFormatStainer(Stainer):
         num_format (int):
             Number of latlong formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
         formats (str list or None):
-            List of datetime string format options that the LatlongFormatStainer chooses from. Use  module string formats. 
+            List of latlong string format options that the LatlongFormatStainer chooses from. Use the Latlong module string formats. 
             If None, a default list of formats are provided.
     """
     def __init__(self, col_idx, name="Latlong Formats", num_format = 2, formats = None):
@@ -454,8 +454,9 @@ class LatlongFormatStainer(Stainer):
 
 class LatlongSplitStainer(Stainer):
     """
-    Stainer that splits each given latlong columns into 3 columns, representing degree, minute, and seconds.
-    If a given column's name is 'X', then the respective generated column names 'X_deg', 'X_min', and 'X_sec'.
+    Stainer that splits each given latlong columns into 6 columns, representing degree, minute, and seconds, for lat and long respectively.
+    If a given column's name is 'X', then the respective generated column names 'X_lat_deg', 'X_lat_min', 'X_lat_sec', 'X_long_deg', 'X_long_min',
+    and 'X_long_sec'.
     If a column is split, the original column will be dropped.
     
     Parameters:
@@ -494,26 +495,23 @@ class LatlongSplitStainer(Stainer):
                 message += f"{col_name}, "
                 
                 #check to ensure no undetected column name conflict
-                if f"{col_name}_day" in new_df.columns:
-                    raise KeyError(f"column name: '{col_name}_day' already exists in dataframe.")
-                if f"{col_name}_month" in new_df.columns:
-                    raise KeyError(f"column name: '{col_name}_month' already exists in dataframe.")
-                if f"{col_name}_year" in new_df.columns:
-                    raise KeyError(f"column name: '{col_name}_year' already exists in dataframe.")
-                
-                month_format = rng.choice(["%m", "%B", "%b"]) #randomly chosen month format
-                year_format = rng.choice(["%Y", "%y"]) #randomly chosen year format
+                for suffix in ['lat_deg', 'lat_min', 'lat_sec', 'long_deg', 'long_min', 'long_sec']:
+                    if f"{col_name}_{suffix}" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_{suffix}' already exists in dataframe.")
 
                 new_df.drop(col_name, axis=1, inplace=True)
-                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x.strftime("%d")))
-                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x.strftime(month_format)))
-                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x.strftime(year_format)))
+                new_df.insert(j_new, f"{col_name}_lat_deg", df[col_name].apply(lambda x: x.strflatlong("%da")))
+                new_df.insert(j_new + 1, f"{col_name}_lat_min", df[col_name].apply(lambda x: x.strflatlong("%ma")))
+                new_df.insert(j_new + 2, f"{col_name}_lat_sec", df[col_name].apply(lambda x: x.strflatlong("%s5a")))
+                new_df.insert(j_new + 3, f"{col_name}_long_deg", df[col_name].apply(lambda x: x.strflatlong("%do")))
+                new_df.insert(j_new + 4, f"{col_name}_long_min", df[col_name].apply(lambda x: x.strflatlong("%mo")))
+                new_df.insert(j_new + 5, f"{col_name}_long_sec", df[col_name].apply(lambda x: x.strflatlong("%s5o")))
                 
-                col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
-                j_new += 3
+                col_map_dct[j].extend([j_new, j_new + 1, j_new + 2, j_new + 3, j_new + 4, j_new + 5])
+                j_new += 6
         
         if j == j_new - 1:
-            message = "No date columns were split."
+            message = "No latlong columns were split."
         else:
             message = message[:-2]
 
