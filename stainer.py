@@ -314,7 +314,7 @@ class DatetimeFormatStainer(Stainer):
             random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
             
             for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
-                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x.strftime(subformats[i]))
+                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x if pd.isna(x) else x.strftime(subformats[i]))
                 #for each set of random indices, apply a different strftime format
 
             new_df.iloc[:, j] = new_col
