@@ -234,10 +234,14 @@ class InflectionStainer(Stainer):
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
-        
+
+        message = "Categorical inflections on:\n"
+        inflections_used = dict() #dict of dicts to store inflections used for history
+
         #iterate over each column index
         for j in col_idx:
             new_col = df.iloc[:, j].copy() #instantiate a copy of this column which will be used to replace the existing one in new_df
+            inflections_used[j] = dict()
             cats = [cat for cat in new_col.unique()] #unique categories in the column
             if self.num_format == -1 or self.num_format > len(self.formats):
                 subformats = self.formats #use all formats
@@ -248,13 +252,14 @@ class InflectionStainer(Stainer):
             #interate over each string category
             for cat in cats:
                 sub_col = new_col[new_col == cat] #subset of col which only contains this category
-                
 
                 if j in self.ignore_cats.keys() and cat in self.ignore_cats[j]: #ignore this category
                     new_col_lst.append(sub_col)
                 else:
                     cat_inflection_formats = self._get_inflected_strings(cat, subformats) #set of inflected strings for this category
                     
+                    inflections_used[j][cat] = list(cat_inflection_formats)
+
                     new_col_lst.append(
                         pd.Series(rng.choice(list(cat_inflection_formats), size = sub_col.shape[0]), index=sub_col.index)
                     ) #randomly sample the strings from the available inflections    
@@ -262,7 +267,8 @@ class InflectionStainer(Stainer):
             new_df.iloc[:, j] = new_col
         
         end = time()
-        self.update_history("Category inflections", end - start)
+        message += inflections_used.__repr__()
+        self.update_history(message, end - start)
         return new_df, {}, {}
 
 class DateFormatStainer(Stainer):
@@ -302,6 +308,8 @@ class DateFormatStainer(Stainer):
 
         start = time()
         nrow = new_df.shape[0]
+        message = "Date Formats used:\n"
+        date_formats_used = {} #dict to store date formats used
         
         #iterate over each column index
         for j in col_idx:
@@ -311,6 +319,8 @@ class DateFormatStainer(Stainer):
             else:
                 subformats = rng.choice(self.formats, size=self.num_format, replace=False) #randomly select num_format formats from self.formats to be used for this column
             
+            date_formats_used[j] = list(subformats)
+
             random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
             
             for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
@@ -318,9 +328,10 @@ class DateFormatStainer(Stainer):
                 #for each set of random indices, apply a different strftime format
 
             new_df.iloc[:, j] = new_col
-    
+
         end = time()
-        self.update_history("Date Formats", end - start)
+        message += date_formats_used.__repr__()
+        self.update_history(message, end - start)
         return new_df, {}, {}
 
 class DateSplitStainer(Stainer):
@@ -443,6 +454,8 @@ class BinningStainer(Stainer):
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
+        message = "Binning using the following cutpoints:\n"
+        cutpoints_used = {} #dict of cutpoints used per column
 
         #helper function to round to significant digits
         def round_sig(x, sig=2):
@@ -458,11 +471,13 @@ class BinningStainer(Stainer):
                 n_groups = self.n_groups
             
             cutpoints = [round_sig(cp, self.sf) for cp in new_col.quantile([i/n_groups for i in range(n_groups + 1)], interpolation='lower').tolist()]
+            cutpoints_used[j] = cutpoints
 
             new_df.iloc[:, j] = new_col.apply(lambda x: x if pd.isna(x) else self._bin_into_group(x, cutpoints))
         
         end = time()
-        self.update_history("Binning", end - start)
+        message += cutpoints_used.__repr__()
+        self.update_history(message, end - start)
         return new_df, {}, {}
 
       
@@ -500,6 +515,8 @@ class LatlongFormatStainer(Stainer):
 
         start = time()
         nrow = new_df.shape[0]
+        message = "Latlong Formats used:\n"
+        latlong_formats_used = {} #dict to store latlong formats used
         
         #iterate over each column index
         for j in col_idx:
@@ -509,6 +526,7 @@ class LatlongFormatStainer(Stainer):
             else:
                 subformats = rng.choice(self.formats, size=self.num_format, replace=False) #randomly select num_format formats from self.formats to be used for this column
             
+            latlong_formats_used[j] = list(subformats)
             random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
             
             for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
@@ -518,7 +536,8 @@ class LatlongFormatStainer(Stainer):
             new_df.iloc[:, j] = new_col
     
         end = time()
-        self.update_history("Latlong Formats", end - start)
+        message += latlong_formats_used.__repr__()
+        self.update_history(message, end - start)
         return new_df, {}, {}
 
 
