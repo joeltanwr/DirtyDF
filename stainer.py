@@ -271,22 +271,22 @@ class InflectionStainer(Stainer):
         self.update_history(message, end - start)
         return new_df, {}, {}
 
-class DateFormatStainer(Stainer):
+class DatetimeFormatStainer(Stainer):
     """
-    Stainer to alter the format of dates for given date columns.
+    Stainer to alter the format of datetimes for given datetime columns.
     
     Parameters:
         name (str):
             Name of stainer.
         col_idx (int list):
-            Columns to perform date stainer on. Must be specified.
+            Columns to perform datetime stainer on. Must be specified.
         num_format (int):
-            Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
+            Number of datetime formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
         formats (str list or None):
-            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
-            a default list of 41 non-ambiguous (month is named) date formats are provided.
+            List of datetime string format options that the DatetimeFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). 
+            If None, a default list of 41 non-ambiguous (month is named) datetime formats are provided.
     """
-    def __init__(self, col_idx, name="Date Formats", num_format = 2, formats = None):
+    def __init__(self, col_idx, name="Datetime Formats", num_format = 2, formats = None):
         import itertools
         
         super().__init__(name, [], col_idx)
@@ -295,12 +295,12 @@ class DateFormatStainer(Stainer):
         if formats:
             self.formats = formats
         else:
-            self.formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
+            self.formats = [date + " %H:%M:%S" for date in [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
                                 for m_type in ["%b", "%B"]
                                 for d_m in itertools.permutations(["%d", m_type])
                                 for d_m_str in [f"{d_m[0]}{br}{d_m[1]}"]
                                 for dm_y in itertools.permutations([d_m_str, '%Y'])
-                           ] + ['%Y%m%d'] #default formats; 41 total and non-ambiguous
+                           ] + ['%Y%m%d']] #default formats; 41 total and non-ambiguous
             
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
@@ -324,7 +324,7 @@ class DateFormatStainer(Stainer):
             random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
             
             for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
-                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x.strftime(subformats[i]))
+                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x if pd.isna(x) else x.strftime(subformats[i]))
                 #for each set of random indices, apply a different strftime format
 
             new_df.iloc[:, j] = new_col
@@ -334,10 +334,39 @@ class DateFormatStainer(Stainer):
         self.update_history(message, end - start)
         return new_df, {}, {}
 
-class DateSplitStainer(Stainer):
+class DateFormatStainer(DatetimeFormatStainer):
+    """
+    Stainer to alter the format of dates for given date columns.
+    
+    Parameters:
+        name (str):
+            Name of stainer.
+        col_idx (int list):
+            Columns to perform date stainer on.
+        num_format (int):
+            Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
+        formats (str list or None):
+            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
+            a default list of 41 non-ambiguous (month is named) date formats are provided.
+    """
+    def __init__(self, col_idx=[], name="Date Formats", num_format = 2, formats = None):
+        import itertools
+        if formats == None:
+            formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
+                        for m_type in ["%b", "%B"]
+                        for d_m in itertools.permutations(["%d", m_type])
+                        for d_m_str in [f"{d_m[0]}{br}{d_m[1]}"]
+                        for dm_y in itertools.permutations([d_m_str, '%Y'])
+                    ] + ['%Y%m%d'] #default formats; 41 total and non-ambiguous
+
+        super().__init__(col_idx=col_idx, name=name, num_format=num_format, formats=formats)
+
+
+class DatetimeSplitStainer(Stainer):
     """
     Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year. 
-    If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'.
+    If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'. If keep_time is True,
+    then further generate 'X_hour', 'X_minute', and 'X_second'.
     If a column is split, the original column will be dropped.
     For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively. 
     
@@ -345,12 +374,15 @@ class DateSplitStainer(Stainer):
         name (str):
             Name of stainer.
         col_idx (int list):
-            date columns to perform date splitting on. Must be specified.
+            date columns to perform date splitting on.
+        keep_time (boolean):
+            parameter to set whether time component of datetime should be kept, thus 3 new columns are created. Default is True.
         prob:
             probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
-    def __init__(self, col_idx, name="Date Split", prob=1.0):
+    def __init__(self, col_idx=[], name="Date Split", keep_time = True, prob=1.0):
         super().__init__(name, [], col_idx)
+        self.keep_time = keep_time
 
         if prob < 0 or prob > 1:
             raise ValueError("prob is a probability, it must be in the range [0, 1].")
@@ -388,13 +420,29 @@ class DateSplitStainer(Stainer):
                 year_format = rng.choice(["%Y", "%y"]) #randomly chosen year format
 
                 new_df.drop(col_name, axis=1, inplace=True)
-                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x.strftime("%d")))
-                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x.strftime(month_format)))
-                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x.strftime(year_format)))
+                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x if pd.isna(x) else x.strftime("%d")))
+                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x if pd.isna(x) else x.strftime(month_format)))
+                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x if pd.isna(x) else x.strftime(year_format)))
                 
                 col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
                 j_new += 3
-        
+
+                if self.keep_time:
+                    #check to ensure no undetected column name conflict
+                    if f"{col_name}_hour" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_hour' already exists in dataframe.")
+                    if f"{col_name}_minute" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_minute' already exists in dataframe.")
+                    if f"{col_name}_second" in new_df.columns:
+                        raise KeyError(f"column name: '{col_name}_second' already exists in dataframe.")
+
+                    new_df.insert(j_new, f"{col_name}_hour", df[col_name].apply(lambda x: x if pd.isna(x) else x.strftime("%H")))
+                    new_df.insert(j_new + 1, f"{col_name}_minute", df[col_name].apply(lambda x: x if pd.isna(x) else x.strftime("%M")))
+                    new_df.insert(j_new + 2, f"{col_name}_second", df[col_name].apply(lambda x: x if pd.isna(x) else x.strftime("%S")))
+                    
+                    col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
+                    j_new += 3
+
         if j == j_new - 1:
             message = "No date columns were split."
         else:
