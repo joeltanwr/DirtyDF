@@ -1,7 +1,9 @@
 import pandas as pd
+from pandas.api.types import is_numeric_dtype, is_datetime64_any_dtype, is_categorical_dtype
 from numpy.random import default_rng
 from time import time
 from functools import reduce
+from warnings import warn
 from stainer import *
 from history import *
 
@@ -14,6 +16,8 @@ Edits to implement:
         retrieve the relevant column types
     This should then be checked against the stainer columns
     Map the relevant columns then call the transform
+    
+    - DONE
 
 2. Function that will handle the mapping (Some sort of function that will trace back the ordering)
     - DONE
@@ -42,12 +46,17 @@ class DirtyDF:
                 self.seed = int(time() * 100 % (2**32 - 1))
             else:
                 self.seed = seed
-
+            
             self.rng = default_rng(self.seed)
+            self.orig_shape = df.shape
             self.stainers = []
             self.row_map = np.eye(df.shape[0])
             self.col_map = np.eye(df.shape[1])
             self.history = [] 
+        
+        self.cat_cols = [i for i in range(df.shape[1]) if is_categorical_dtype(df.iloc[:, i])]
+        self.num_cols = [i for i in range(df.shape[1]) if is_numeric_dtype(df.iloc[:, i])]
+        self.dt_cols = [i for i in range(df.shape[1]) if is_datetime64_any_dtype(df.iloc[:, i])]
     
     def get_df(self):
         return self.df
@@ -89,12 +98,12 @@ class DirtyDF:
     def __add_history__(self, message, row_map, col_map):
         self.history.append(History(message, row_map, col_map))
     
-    def add_stainers(self, stainer, use_orig_row = True, use_orig_col = True):
+    def add_stainers(self, stain, use_orig_row = True, use_orig_col = True):
         ddf = self.copy()
-        if isinstance(stainer, Stainer):
-            ddf.stainers.append((stainer, use_orig_row, use_orig_col))
+        if isinstance(stain, Stainer):
+            ddf.stainers.append((stain, use_orig_row, use_orig_col))
         else:
-            for st in stainer:
+            for st in stain:
                 ddf.stainers.append((st, use_orig_row, use_orig_col))
         
         return ddf
@@ -111,20 +120,44 @@ class DirtyDF:
         
         row, col = stainer.get_indices()
         
-        n_row, n_col = self.df.shape
+        n_row, n_col = self.orig_shape
         
         if not row:
             row = [i for i in range(n_row)]
         if not col:
             col = [i for i in range(n_col)]
         
-        if not use_orig_row:
-            row = reduce(lambda x, y: np.concatenate([x, y]).reshape(-1), \
-                         map(lambda x: np.nonzero(self.row_map[x]), row))
-        if not use_orig_col:
-            col = reduce(lambda x, y: np.concatenate([x, y]).reshape(-1), \
-                         map(lambda x: np.nonzero(self.col_map[x]), col))
-        
+        def convert(x, y):
+            x = np.array(x).reshape(-1)
+            y = np.array(y).reshape(-1)
+            return np.concatenate([x, y]).reshape(-1)
+        if use_orig_row:
+            row = list(map(int, reduce(convert,
+                         map(lambda x: np.nonzero(self.row_map[x]), row), ())))
+        if use_orig_col:
+            col = list(map(int, reduce(convert, 
+                         map(lambda x: np.nonzero(self.col_map[x]), col), ())))
+            
+        col_type = stainer.get_col_type()
+        if col_type == "all":
+            col = col
+        elif col_type not in ("category", "cat", 
+                              "datetime", "date", "time", 
+                              "numeric", "int", "float"):
+            warn(f"Invalid Stainer Column type for {stainer.name}. Using all columns instead")
+        else:
+            input_cols = set(col)
+            if col_type in ("category", "cat"):
+                relevant_cols = set(self.cat_cols)
+            if col_type in ("datetime", "date", "time"):
+                relevant_cols = set(self.dt_cols)
+            if col_type in ("numeric", "int", "float"):
+                relevant_cols = set(self.num_cols)
+            if not input_cols.issubset(relevant_cols):
+                raise TypeError(f"Column with incorrect column type provided to stainer {stainer.name}, which requires column type {col_type}.")
+            else:
+                col = list(input_cols & relevant_cols)
+            
         res = stainer.transform(self.df, self.rng, row, col)
         
         try:
@@ -169,6 +202,7 @@ class DirtyDF:
         new_ddf = DirtyDF(self.df.copy(), copy = True)
         new_ddf.seed = self.seed
         new_ddf.rng = self.rng
+        new_ddf.orig_shape = self.orig_shape
         new_ddf.stainers = self.stainers.copy()
         new_ddf.history = self.history.copy()
         new_ddf.row_map = self.row_map.copy()
