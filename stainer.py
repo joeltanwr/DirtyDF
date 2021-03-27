@@ -409,9 +409,9 @@ class DatetimeSplitStainer(Stainer):
                 year_format = rng.choice(["%Y", "%y"]) #randomly chosen year format
 
                 new_df.drop(col_name, axis=1, inplace=True)
-                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x.strftime("%d")))
-                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x.strftime(month_format)))
-                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x.strftime(year_format)))
+                new_df.insert(j_new, f"{col_name}_day", df[col_name].apply(lambda x: x if x.isna() else x.strftime("%d")))
+                new_df.insert(j_new + 1, f"{col_name}_month", df[col_name].apply(lambda x: x if x.isna() else x.strftime(month_format)))
+                new_df.insert(j_new + 2, f"{col_name}_year", df[col_name].apply(lambda x: x if x.isna() else x.strftime(year_format)))
                 
                 col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
                 j_new += 3
@@ -425,9 +425,9 @@ class DatetimeSplitStainer(Stainer):
                     if f"{col_name}_second" in new_df.columns:
                         raise KeyError(f"column name: '{col_name}_second' already exists in dataframe.")
 
-                    new_df.insert(j_new, f"{col_name}_hour", df[col_name].apply(lambda x: x.strftime("%H")))
-                    new_df.insert(j_new + 1, f"{col_name}_minute", df[col_name].apply(lambda x: x.strftime("%M")))
-                    new_df.insert(j_new + 2, f"{col_name}_second", df[col_name].apply(lambda x: x.strftime("%S")))
+                    new_df.insert(j_new, f"{col_name}_hour", df[col_name].apply(lambda x: x if x.isna() else x.strftime("%H")))
+                    new_df.insert(j_new + 1, f"{col_name}_minute", df[col_name].apply(lambda x: x if x.isna() else x.strftime("%M")))
+                    new_df.insert(j_new + 2, f"{col_name}_second", df[col_name].apply(lambda x: x if x.isna() else x.strftime("%S")))
                     
                     col_map_dct[j].extend([j_new, j_new + 1, j_new + 2])
                     j_new += 3
