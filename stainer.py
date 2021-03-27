@@ -442,7 +442,7 @@ class LatlongFormatStainer(Stainer):
             random_idxs = np.array_split(rng.choice(nrow, size=nrow, replace=False), len(subformats)) #randomly split dataframe indices into len(subformats) number of groups
             
             for i in range(len(subformats)): #for each group of indices, apply a different format from subformats
-                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x.strflatlong(subformats[i]))
+                new_col.iloc[random_idxs[i]] = new_df.iloc[random_idxs[i], j].apply(lambda x: x if pd.isna(x) else x.strflatlong(subformats[i]))
                 #for each set of random indices, apply a different latlong format
 
             new_df.iloc[:, j] = new_col
@@ -500,12 +500,12 @@ class LatlongSplitStainer(Stainer):
                         raise KeyError(f"column name: '{col_name}_{suffix}' already exists in dataframe.")
 
                 new_df.drop(col_name, axis=1, inplace=True)
-                new_df.insert(j_new, f"{col_name}_lat_deg", df[col_name].apply(lambda x: x.strflatlong("%da")))
-                new_df.insert(j_new + 1, f"{col_name}_lat_min", df[col_name].apply(lambda x: x.strflatlong("%ma")))
-                new_df.insert(j_new + 2, f"{col_name}_lat_sec", df[col_name].apply(lambda x: x.strflatlong("%s5a")))
-                new_df.insert(j_new + 3, f"{col_name}_long_deg", df[col_name].apply(lambda x: x.strflatlong("%do")))
-                new_df.insert(j_new + 4, f"{col_name}_long_min", df[col_name].apply(lambda x: x.strflatlong("%mo")))
-                new_df.insert(j_new + 5, f"{col_name}_long_sec", df[col_name].apply(lambda x: x.strflatlong("%s5o")))
+                new_df.insert(j_new, f"{col_name}_lat_deg", df[col_name].apply(lambda x: x if pd.isna(x) else x.strflatlong("%da")))
+                new_df.insert(j_new + 1, f"{col_name}_lat_min", df[col_name].apply(lambda x: x if pd.isna(x) else x.strflatlong("%ma")))
+                new_df.insert(j_new + 2, f"{col_name}_lat_sec", df[col_name].apply(lambda x: x if pd.isna(x) else x.strflatlong("%s5a")))
+                new_df.insert(j_new + 3, f"{col_name}_long_deg", df[col_name].apply(lambda x: x if pd.isna(x) else x.strflatlong("%do")))
+                new_df.insert(j_new + 4, f"{col_name}_long_min", df[col_name].apply(lambda x: x if pd.isna(x) else x.strflatlong("%mo")))
+                new_df.insert(j_new + 5, f"{col_name}_long_sec", df[col_name].apply(lambda x: x if pd.isna(x) else x.strflatlong("%s5o")))
                 
                 col_map_dct[j].extend([j_new, j_new + 1, j_new + 2, j_new + 3, j_new + 4, j_new + 5])
                 j_new += 6
