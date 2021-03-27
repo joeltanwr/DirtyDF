@@ -4,6 +4,7 @@ Artificial Dataset Generation
 .. autosummary::
    :toctree: _autosummary
    :template:
+   :recursive:
 
    artificial_datagen
 

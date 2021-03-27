@@ -339,7 +339,7 @@ class DateSplitStainer(Stainer):
     prob: float in range [0, 1]
         probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
-    def __init__(self, col_idx, name="Date Split", prob=1.0):
+    def __init__(self , col_idx , name="Date Split" , prob=1.0):
         super().__init__(name, [], col_idx)
 
         if prob < 0 or prob > 1:
