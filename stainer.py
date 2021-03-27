@@ -331,14 +331,14 @@ class DateFormatStainer(DatetimeFormatStainer):
         name (str):
             Name of stainer.
         col_idx (int list):
-            Columns to perform date stainer on. Must be specified.
+            Columns to perform date stainer on.
         num_format (int):
             Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
         formats (str list or None):
             List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
             a default list of 41 non-ambiguous (month is named) date formats are provided.
     """
-    def __init__(self, col_idx, name="Date Formats", num_format = 2, formats = None):
+    def __init__(self, col_idx=[], name="Date Formats", num_format = 2, formats = None):
         import itertools
         if formats == None:
             formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
@@ -363,13 +363,13 @@ class DatetimeSplitStainer(Stainer):
         name (str):
             Name of stainer.
         col_idx (int list):
-            date columns to perform date splitting on. Must be specified.
+            date columns to perform date splitting on.
         keep_time (boolean):
             parameter to set whether time component of datetime should be kept, thus 3 new columns are created. Default is True.
         prob:
             probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
-    def __init__(self, col_idx, name="Date Split", keep_time = True, prob=1.0):
+    def __init__(self, col_idx=[], name="Date Split", keep_time = True, prob=1.0):
         super().__init__(name, [], col_idx)
         self.keep_time = keep_time
 
