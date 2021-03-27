@@ -419,7 +419,7 @@ class BinningStainer(Stainer):
             
             cutpoints = [round_sig(cp, self.sf) for cp in new_col.quantile([i/n_groups for i in range(n_groups + 1)], interpolation='lower').tolist()]
 
-            new_df.iloc[:, j] = new_col.apply(lambda x: self._bin_into_group(x, cutpoints))
+            new_df.iloc[:, j] = new_col.apply(lambda x: x if pd.isna(x) else self._bin_into_group(x, cutpoints))
         
         end = time()
         self.update_history("Binning", end - start)
