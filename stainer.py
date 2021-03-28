@@ -453,6 +453,59 @@ class DatetimeSplitStainer(Stainer):
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, col_map
+    
+class FTransformStainer(Stainer):
+    col_type = "numeric"
+    function_dict = {"square": lambda x: x**2,
+                 "cube": lambda x: x**3,
+                 "sqrt": lambda x: round(x**0.5, 2),
+                 "cubert": lambda x: round(x**(1/3), 2),
+                 "inverse": lambda x: 1000 if x == 0 else round(1/x, 2),
+                 "ln": lambda x: 0 if x == 0 else round(np.log(x), 2),
+                 "exp": lambda x: round(np.exp(x), 2)}
+    
+    def __init__(self, deg, name = "Function Transform", col_idx = [], trans_lst = [], trans_dict = {}, scale = False):
+        super().__init__(name, [], col_idx)
+        if deg <= 0 or deg > 1:
+            raise ValueError("Degree should be in range (0, 1]")
+        self.deg = deg
+        self.trans = trans_dict.copy()
+        for label in trans_lst:
+            if label in self.trans:
+                raise Exception(f"Duplicate Function Name: {label}")
+            try:
+                self.trans[label] = self.function_dict[label]
+            except:
+                raise NameError(f"Invalid Transformation Name: {label}")
+        self.scale = scale
+    
+    def transform(self, df, rng, row_idx, col_idx):
+        new_df, _, cols = self._init_transform(df, row_idx, col_idx)
+        start = time()
+        
+        rando_idx = rng.choice(len(cols), int(len(cols) * self.deg), replace = False)
+        message = ""
+        
+        for idx in rando_idx:
+            col = cols[idx]
+            orig_min = new_df.iloc[:, col].min()
+            orig_max = new_df.iloc[:, col].max()
+            
+            rando_func = rng.choice(list(self.trans.keys()))
+            new_df.iloc[:, col] = new_df.iloc[:, col].apply(self.trans[rando_func])
+
+            if self.scale:
+                curr_col = new_df.iloc[:, col]
+                data_min, data_max = curr_col.min(), curr_col.max()
+                std_dev = (curr_col - data_min) / (data_max - data_min)
+                new_col = std_dev * (orig_max - orig_min) + orig_min
+                new_df.iloc[:, col] = new_col
+            
+            message += f"Converted column {col} with transformation {rando_func}. \n "
+        
+        end = time()
+        self.update_history(message, end - start)
+        return new_df, {}, {}
 
 class NullifyStainer(Stainer):
     """
