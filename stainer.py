@@ -454,6 +454,50 @@ class DatetimeSplitStainer(Stainer):
         self.update_history(message, end - start)
         return new_df, {}, col_map
 
+class NullifyStainer(Stainer):
+    """
+    Stainer that convert various values to missing data / values that represent missing values.
+
+    Parameters:
+        deg (0, 1]:
+            Determines the proportion of selected data that would be nullified
+        new_val (int/str):
+            Value that would replace the specific data.
+            Defaults to None
+        new_type (boolean):
+            Allows the new_val to be of a different type than the current column.
+            Defaults to False (new_val must be same type as the column to be changed)
+    """
+    def __init__(self, deg, name = "Nullify", row_idx = [], col_idx = [], new_val = None, new_type = False):
+        super().__init__(name, row_idx, col_idx)
+        if deg <= 0 or deg > 1:
+            raise ValueError("Degree should be in range (0, 1]")
+        self.deg = deg
+        self.new_val = new_val
+        self.new_type = new_type
+        
+    def transform(self, df, rng, row_idx = None, col_idx = None):
+        new_df, row, col = self._init_transform(df, row_idx, col_idx)
+        start = time()
+        
+        all_cells = list(product(row, col))
+        total_null = int(len(all_cells) * self.deg)
+        selected_cells = rng.choice(len(all_cells), size = total_null, replace = False)
+
+        for idx in selected_cells:
+            row, col = all_cells[idx]
+            new_df.iloc[row, col] = self.new_val
+        
+        if self.new_val != None and not self.new_type:
+            if np.mean(df.dtypes == new_df.dtypes) < 1:
+                raise Exception(f"Column type changed when nullifying for: {df.columns[(df.dtypes != new_df.dtypes)].tolist()}")
+        
+        end = time()
+        message = f"Replaced {total_null} values to become {'empty' if self.new_val == None else self.new_val} in specificed rows/cols."
+        self.update_history(message, end - start)
+        
+        return new_df, {}, {}
+
 class BinningStainer(Stainer):
     """
     Stainer that bins continuous columns into discrete groups (each group represents an interval [a,b)).
