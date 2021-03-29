@@ -4,11 +4,19 @@ import pandas as pd
 import itertools
 from itertools import product
 
-# require inflection module for inflection stainer
+"""Require inflection module for inflection stainer"""
+
 class Stainer:
+    """ Parent class. Contains basic initailisations meant for all stainers to inherit from"""
     col_type = "all"
     
     def __init__(self, name = "Unnamed Stainer", row_idx = [], col_idx = []):
+        """ Initialisation.   
+        Args:
+            name(str): Name of stainer
+            row_idx(int list): Row indices that the stainer will operate on
+            col_idx(int list): Column indicies that the stainer will operate on
+        """
         self.name = name
         self.row_idx = row_idx
         self.col_idx = col_idx
@@ -16,17 +24,47 @@ class Stainer:
         self.__initialize_history__()
 
     def get_col_type(self):
+        """ Returns the column type that the stainer operates on.
+        
+        Returns:
+            string: Representing column type. Currently supports ["all", "category", "cat", 
+                              "datetime", "date", "time", "numeric", "int", "float"]
+        """
         return self.col_type
 
     def get_indices(self):
         return self.row_idx, self.col_idx
     
     def transform(self, df, rng, row_idx, col_idx):
+        """ Stains dataframe according to the Stainer type.
+        
+        Args:
+            df (DataFrame): dataframe to be transformed
+            rng (BitGenerator): PCG64 pseudo-random number generator
+            row_idx(int list): Row indices that the stainer will operate on
+            col_idx(int list): Column indicies that the stainer will operate on
+        
+        Returns:
+            tuple(DataFrame, int:int dictionary, int:int dictionary): Returns the modified dataframe, a row mapping which shows the relationship between 
+            the original row position and the new position, and a column mapping which shows the relationship between the original column position and
+            then new position.
+        
+        Raises:
+            Exception: Children class does not implement the transform method
+        """
         raise Exception("Stainer not implemented")
 
     def _init_transform(self, df, row_idx, col_idx):
-        """
-        Helper method to assign df / row / cols before transforming
+        """ Helper method to assign df / row / cols before transforming
+        
+        Args:
+            df (DataFrame): dataframe to be transformed
+            row_idx(int list): Row indices that the stainer will operate on
+            col_idx(int list): Column indicies that the stainer will operate on
+        
+        Returns:
+            tuple(Dataframe, list of integers, list of integers): Returns a copy of the provided dataframe, processed list of 
+            row and column indices which will be selected for transformation.
         """
         if not isinstance(df, pd.DataFrame):
             raise TypeError('df should be pandas DataFrame')
@@ -50,7 +88,11 @@ class Stainer:
         self.time += time
     
     def get_history(self):
-        """ Creates a history object and returns it"""
+        """ Compiles history information and returns it 
+        
+        Returns:
+            tuple(str, str, float): Returns name of stainer, message for user, and time taken to execute the transform
+        """
         msg, time = self.message, self.time
         if not time:
             time = "Time not updated. Use update_history to update time"
@@ -59,12 +101,15 @@ class Stainer:
     
     
 class ShuffleStainer(Stainer):
-    """ This description isn't complete """ 
+    """ Stainer to randomly rearrange the rows of the DataFrame """
     
-    def __init__(self, name = "Shuffle"):
+    def __init__(self, name = "Shuffle"):        
         super().__init__(name, [], [])
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """ 
+        
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
@@ -85,15 +130,27 @@ class ShuffleStainer(Stainer):
     
     
 class RowDuplicateStainer(Stainer):
-    """
-    Stainer to duplicate rows of a dataset.
-    deg (0, 1]:
-        Proportion of given data that would be duplicated.
-        Note: If 5 rows were specified and deg = 0.6, only 3 rows will be duplicated
-    max_rep (2/3/4/5):
-        Maximum number of times a row can appear after duplication. That is, if max_rep = 2, 
-        the original row was duplicated once to create 2 copies total.
-        Capped at 5 to conserve computational power
+    """ Stainer to duplicate rows of a dataset.
+    
+    Args:
+        deg (0, 1]:
+            Proportion of given data that would be duplicated.
+            Note: If 5 rows were specified and deg = 0.6, only 3 rows will be duplicated
+        max_rep (2/3/4/5):
+            Maximum number of times a row can appear after duplication. That is, if max_rep = 2, 
+            the original row was duplicated once to create 2 copies total.
+            Capped at 5 to conserve computational power.
+            Defaults to 2
+        name (str):
+            Name of Stainer to be reflected in the printed summaries
+            Defaults to "Add Duplicates"
+        row_idx (int list):
+            Indices of rows which will be considered for duplication (depending on the degree). 
+            Defaults to [], signifying all valid rows will be considered
+            
+    Raises:
+        ValueError: Degree provided is not in the range of (0, 1]
+        ValueError: max_rep is not in the range of [2, 5]
     """  
     def __init__(self, deg, max_rep = 2, name = "Add Duplicates", row_idx = []):
         super().__init__(name, row_idx, [])
@@ -441,6 +498,41 @@ class DatetimeSplitStainer(Stainer):
         return new_df, {}, col_map_dct
     
 class FTransformStainer(Stainer):
+    """
+    Stainer that takes a numerical column and applies a transformation to it. Only works on numerical columns. 
+    If any other column is selected, a type error will be raised.
+    
+    Attributes:
+        col_type(str): 
+            numeric
+        function_dict(str:function dictionary): 
+            7 default functions, namely square, cube, sqrt (square root), cubert (cube root),
+            inverse (1/x), ln (natural logarithm), exp (exponential)
+            
+    Args:
+        deg (0, 1]:
+            Determines the proportion of selected data that would be transformed
+        name (str):
+            Name of Stainer to be reflected in the printed summaries
+            Defaults to "Function Transform"
+        col_idx (int list):
+            Indices of columns which will be considered for transformation (depending on the degree). 
+            Defaults to [], signifying all valid columns will be considered
+        trans_lst(str list):
+            Names of transformations in function_dict to include in the pool of possible transformations
+        trans_dict(str:function dictionary):
+            {Name of transformation: Function} to include in the pool of possible transformations
+        scale(boolean):
+            If True, will scale the data back to its original range. 
+            Defaults to False
+            
+    Raises:
+        ValueError: Degree provided is not in the range of (0, 1]
+        Exception: If multiple functions are given the same name
+        NameError: Name provided in trans_lst is not one of the 7 default transformations
+        TypeError: Invalid column type provided 
+        ZeroDivisionError: Transformation would reuslt in division by zero
+    """
     col_type = "numeric"
     function_dict = {"square": lambda x: x**2,
                  "cube": lambda x: x**3,
@@ -476,18 +568,25 @@ class FTransformStainer(Stainer):
         
         for idx in rando_idx:
             col = cols[idx]
-            orig_min = new_df.iloc[:, col].min()
-            orig_max = new_df.iloc[:, col].max()
-            
-            rando_func = rng.choice(list(self.trans.keys()))
-            new_df.iloc[:, col] = new_df.iloc[:, col].apply(self.trans[rando_func])
+            try:
+                orig_min = new_df.iloc[:, col].min()
+                orig_max = new_df.iloc[:, col].max()
 
-            if self.scale:
-                curr_col = new_df.iloc[:, col]
-                data_min, data_max = curr_col.min(), curr_col.max()
-                std_dev = (curr_col - data_min) / (data_max - data_min)
-                new_col = std_dev * (orig_max - orig_min) + orig_min
-                new_df.iloc[:, col] = new_col
+                rando_func = rng.choice(list(self.trans.keys()))
+
+                new_df.iloc[:, col] = new_df.iloc[:, col].apply(self.trans[rando_func])
+
+                if self.scale:
+                    curr_col = new_df.iloc[:, col]
+                    data_min, data_max = curr_col.min(), curr_col.max()
+                    std_dev = (curr_col - data_min) / (data_max - data_min)
+                    new_col = std_dev * (orig_max - orig_min) + orig_min
+                    new_df.iloc[:, col] = new_col
+                    
+            except TypeError:
+                raise TypeError(f"Column '{new_df.columns[col]}' is invalid column for numerical transformation")
+            except ZeroDivisionError:
+                raise ZeroDivisionError(f"Applying {rando_func} on {new_df.columns[col]} results in a division by zero.")
             
             message += f"Converted column {new_df.columns[col]} with transformation {rando_func}. \n "
         
@@ -499,15 +598,28 @@ class NullifyStainer(Stainer):
     """
     Stainer that convert various values to missing data / values that represent missing values.
 
-    Parameters:
+    Args:
         deg (0, 1]:
             Determines the proportion of selected data that would be nullified
+        name (str):
+            Name of Stainer to be reflected in the printed summaries
+            Defaults to "Nullify"
+        row_idx (int list):
+            Indices of rows which will be considered for transformation (depending on the degree). 
+            Defaults to [], signifying all valid rows will be considered
+        col_idx (int list):
+            Indices of columns which will be considered for transformation (depending on the degree). 
+            Defaults to [], signifying all valid columns will be considered
         new_val (int/str):
             Value that would replace the specific data.
             Defaults to None
         new_type (boolean):
             Allows the new_val to be of a different type than the current column.
             Defaults to False (new_val must be same type as the column to be changed)
+            
+    Raises:
+        ValueError: Degree provided is not in the range of (0, 1]
+        TypeError: Only when new_type is set to False. Denotes column type is being changed via the addition of the new_val.
     """
     def __init__(self, deg, name = "Nullify", row_idx = [], col_idx = [], new_val = None, new_type = False):
         super().__init__(name, row_idx, col_idx)
@@ -535,7 +647,7 @@ class NullifyStainer(Stainer):
         
         if self.new_val != None and not self.new_type:
             if np.mean(df.dtypes == new_df.dtypes) < 1:
-                raise Exception(f"Column type changed when nullifying for: {df.columns[(df.dtypes != new_df.dtypes)].tolist()}")
+                raise TypeError(f"Column type changed when nullifying for: {df.columns[(df.dtypes != new_df.dtypes)].tolist()}")
         
         end = time()
         message = f"Replaced {total_null} values to become {'empty' if self.new_val == None else self.new_val} in specificed rows/cols."
