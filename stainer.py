@@ -1,6 +1,7 @@
 from time import time
 import numpy as np
 import pandas as pd
+import itertools
 from itertools import product
 
 # require inflection module for inflection stainer
@@ -55,30 +56,8 @@ class Stainer:
             time = "Time not updated. Use update_history to update time"
         self.__initialize_history__()
         return self.name, msg, time
-
-    @staticmethod
-    def convert_mapper_dct_to_array(dct):
-        '''
-        Helper function to convert a mapper in dict form to numpy array. Useful when the final number of columns is unknown before stainer transformation.
-
-        Parameters
-        ----------
-        dct: dictionary of {index: list of indices}
-            the mapper in dict form
-
-        Returns
-        -------
-        np.array
-            the mapper in array form (required for Stainer output) 
-        '''
-        input_size = len(dct.keys())
-        output_size = max([j for v in dct.values() for j in v]) + 1 #output size is the maximal index in dct values + 1 (zero-indexing)
-        col_map = np.zeros((input_size, output_size)) #initialize column map array
-        for i,v in dct.items():
-            for j in v:
-                col_map[i,j] = 1 #update column map array
-        return col_map
-
+    
+    
 class ShuffleStainer(Stainer):
     """ This description isn't complete """ 
     
@@ -94,16 +73,17 @@ class ShuffleStainer(Stainer):
         new_df = new_df.sample(frac = 1, random_state = rng.bit_generator)
         new_idx = new_df["_extra_index_for_stainer"].tolist()
         new_df.drop("_extra_index_for_stainer", axis = 1, inplace = True)
+        new_df.reset_index(inplace = True, drop = True)
         
-        row_map = np.zeros((df.shape[0], df.shape[0]))
-        for i in range(len(row_map)):
-            row_map[new_idx[i]][i] = 1
-        end = time()
-        
-        self.update_history("Order of rows randomized", end - start)
-        
-        return new_df, row_map, {}        
+        row_map = {}
+        for i in range(df.shape[0]):
+            row_map[new_idx[i]] = [i]
 
+        end = time()
+        self.update_history("Order of rows randomized", end - start)
+        return new_df, row_map, {}      
+    
+    
 class RowDuplicateStainer(Stainer):
     """
     Stainer to duplicate rows of a dataset.
@@ -126,31 +106,34 @@ class RowDuplicateStainer(Stainer):
 
     def transform(self, df, rng, row_idx = None, col_idx = None):
         _, row, col = self._init_transform(df, row_idx, col_idx)
+        original_types = df.dtypes
         new_df = []
-        row_map = np.zeros((df.shape[0], int(df.shape[0] * self.deg * self.max_rep) + 1))
+        row_map = {} 
         
         start = time()
         idx_to_dup = rng.choice(row, size = int(self.deg * df.shape[0]), replace = False)
         idx_to_dup.sort()
         
         new_idx = 0
-
         for old_idx, *row in df.itertuples():
+            row_map[old_idx] = []
             if len(idx_to_dup) and old_idx == idx_to_dup[0]:
                 num_dup = rng.integers(2, self.max_rep, endpoint = True)
                 new_df.extend([list(row)] * num_dup)
                 for i in range(num_dup):
-                    row_map[old_idx][new_idx] = 1
+                    row_map[old_idx].append(new_idx)
                     new_idx += 1
                 idx_to_dup = idx_to_dup[1:]
             else:
                 new_df.append(list(row))
-                row_map[old_idx][new_idx] = 1
+                row_map[old_idx].append(new_idx)
                 new_idx += 1
-
-        row_map = row_map[:, :new_idx]
         
         new_df = pd.DataFrame(new_df, columns = df.columns)
+        
+        for i in range(new_df.shape[1]): # Assign back original column types
+            new_df.iloc[:, i] = new_df.iloc[:, i].astype(original_types[i])
+            
         end = time()
         
         message = f"Added Duplicate Rows for {int(self.deg * df.shape[0])} rows. \n" + \
@@ -162,6 +145,7 @@ class RowDuplicateStainer(Stainer):
         return new_df, row_map, {}
     
 class InflectionStainer(Stainer):
+    col_type = 'cat'
     """
     Stainer to introduce random inflections (capitalization, case format, pluralization) to given categorical columns.
 
@@ -181,9 +165,10 @@ class InflectionStainer(Stainer):
             'singularize', 'dasherize', 'humanize', 'titleize', and 'underscore'.
             If None, all inflections are used.
     """
-    def __init__(self, col_idx, name="Inflection", ignore_cats = [], num_format = -1, formats = None):
+    def __init__(self, col_idx = [], name = "Inflection", ignore_cats = [], num_format = -1, formats = None):
         super().__init__(name, [], col_idx)
         self.num_format = num_format
+        
         
         if isinstance(ignore_cats, list): # convert from list to dict
             temp_ignore_cats = ignore_cats.copy()
@@ -251,6 +236,8 @@ class InflectionStainer(Stainer):
             new_col_lst = []
             #interate over each string category
             for cat in cats:
+                if pd.isnull(cat):
+                    continue
                 sub_col = new_col[new_col == cat] #subset of col which only contains this category
 
                 if j in self.ignore_cats.keys() and cat in self.ignore_cats[j]: #ignore this category
@@ -267,11 +254,12 @@ class InflectionStainer(Stainer):
             new_df.iloc[:, j] = new_col
         
         end = time()
-        message += inflections_used.__repr__()
+        message += {new_df.columns[k]: v for k, v in inflections_used.items()}.__repr__()
         self.update_history(message, end - start)
         return new_df, {}, {}
 
 class DatetimeFormatStainer(Stainer):
+    col_type = "datetime"
     """
     Stainer to alter the format of datetimes for given datetime columns.
     
@@ -286,7 +274,7 @@ class DatetimeFormatStainer(Stainer):
             List of datetime string format options that the DatetimeFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). 
             If None, a default list of 41 non-ambiguous (month is named) datetime formats are provided.
     """
-    def __init__(self, col_idx, name="Datetime Formats", num_format = 2, formats = None):
+    def __init__(self, col_idx = [], name = "Datetime Formats", num_format = 2, formats = None):
         import itertools
         
         super().__init__(name, [], col_idx)
@@ -330,11 +318,12 @@ class DatetimeFormatStainer(Stainer):
             new_df.iloc[:, j] = new_col
 
         end = time()
-        message += date_formats_used.__repr__()
+        message += {new_df.columns[k]: v for k, v in date_formats_used.items()}.__repr__()
         self.update_history(message, end - start)
         return new_df, {}, {}
 
 class DateFormatStainer(DatetimeFormatStainer):
+    col_type = "date"
     """
     Stainer to alter the format of dates for given date columns.
     
@@ -349,8 +338,7 @@ class DateFormatStainer(DatetimeFormatStainer):
             List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
             a default list of 41 non-ambiguous (month is named) date formats are provided.
     """
-    def __init__(self, col_idx=[], name="Date Formats", num_format = 2, formats = None):
-        import itertools
+    def __init__(self, col_idx = [], name="Date Formats", num_format = 2, formats = None):
         if formats == None:
             formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
                         for m_type in ["%b", "%B"]
@@ -363,6 +351,7 @@ class DateFormatStainer(DatetimeFormatStainer):
 
 
 class DatetimeSplitStainer(Stainer):
+    col_type = "datetime"
     """
     Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year. 
     If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'. If keep_time is True,
@@ -380,7 +369,7 @@ class DatetimeSplitStainer(Stainer):
         prob:
             probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
-    def __init__(self, col_idx=[], name="Date Split", keep_time = True, prob=1.0):
+    def __init__(self, col_idx = [], name="Date Split", keep_time = True, prob=1.0):
         super().__init__(name, [], col_idx)
         self.keep_time = keep_time
 
@@ -391,7 +380,6 @@ class DatetimeSplitStainer(Stainer):
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
-
         start = time()
         
         message = f"Split the following date columns: "
@@ -401,7 +389,7 @@ class DatetimeSplitStainer(Stainer):
 
         #iterate over all columns, and apply logic only when current column index is in self.col_idx
         for j in range(df.shape[1]):
-            if (j not in self.col_idx) or (rng.random() > self.prob): #current column index not in self.col_idx, or no split due to probability
+            if (j not in col_idx) or (rng.random() > self.prob): #current column index not in self.col_idx, or no split due to probability
                 col_map_dct[j].append(j_new)
                 j_new += 1
             else:
@@ -448,11 +436,9 @@ class DatetimeSplitStainer(Stainer):
         else:
             message = message[:-2]
 
-        col_map = Stainer.convert_mapper_dct_to_array(col_map_dct)
-
         end = time()
         self.update_history(message, end - start)
-        return new_df, {}, col_map
+        return new_df, {}, col_map_dct
     
 class FTransformStainer(Stainer):
     col_type = "numeric"
@@ -477,6 +463,8 @@ class FTransformStainer(Stainer):
                 self.trans[label] = self.function_dict[label]
             except:
                 raise NameError(f"Invalid Transformation Name: {label}")
+        if len(self.trans) == 0:
+            self.trans = FTransformStainer.function_dict 
         self.scale = scale
     
     def transform(self, df, rng, row_idx, col_idx):
@@ -501,12 +489,12 @@ class FTransformStainer(Stainer):
                 new_col = std_dev * (orig_max - orig_min) + orig_min
                 new_df.iloc[:, col] = new_col
             
-            message += f"Converted column {col} with transformation {rando_func}. \n "
+            message += f"Converted column {new_df.columns[col]} with transformation {rando_func}. \n "
         
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, {}
-
+    
 class NullifyStainer(Stainer):
     """
     Stainer that convert various values to missing data / values that represent missing values.
@@ -539,6 +527,10 @@ class NullifyStainer(Stainer):
 
         for idx in selected_cells:
             row, col = all_cells[idx]
+            if self.new_val != None and \
+            is_categorical_dtype(new_df.iloc[:, col]) and \
+            self.new_val not in new_df.iloc[:, col].cat.categories:
+                new_df.iloc[:, col] = new_df.iloc[:, col].cat.add_categories(self.new_val)
             new_df.iloc[row, col] = self.new_val
         
         if self.new_val != None and not self.new_type:
@@ -621,7 +613,8 @@ class BinningStainer(Stainer):
             new_df.iloc[:, j] = new_col.apply(lambda x: x if pd.isna(x) else self._bin_into_group(x, cutpoints))
         
         end = time()
-        message += cutpoints_used.__repr__()
+        
+        message += {new_df.columns[k]: v for k, v in cutpoints_used.items()}.__repr__()
         self.update_history(message, end - start)
         return new_df, {}, {}
 
@@ -644,7 +637,6 @@ class LatlongFormatStainer(Stainer):
             If None, a default list of formats are provided.
     """
     def __init__(self, col_idx, name="Latlong Formats", num_format = 2, formats = None):
-        import itertools
         
         super().__init__(name, [], col_idx)
         self.num_format = num_format
@@ -681,7 +673,7 @@ class LatlongFormatStainer(Stainer):
             new_df.iloc[:, j] = new_col
     
         end = time()
-        message += latlong_formats_used.__repr__()
+        message += {new_df.columns[k]: v for k, v in latlong_formats_used.items()}.__repr__()
         self.update_history(message, end - start)
         return new_df, {}, {}
 
@@ -749,8 +741,6 @@ class LatlongSplitStainer(Stainer):
         else:
             message = message[:-2]
 
-        col_map = Stainer.convert_mapper_dct_to_array(col_map_dct)
-
         end = time()
         self.update_history(message, end - start)
-        return new_df, {}, col_map
+        return new_df, {}, col_map_dct

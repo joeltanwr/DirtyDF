@@ -7,32 +7,6 @@ from warnings import warn
 from stainer import *
 from history import *
 
-"""
-Edits to implement:
-1. Column-types
-    Allow column-type interpretation for DDF
-    For each stainer, a (global) col_type attribute should be added.
-    In the DDF class, before a stainer is ran, the col_type should be queried and the DDF should
-        retrieve the relevant column types
-    This should then be checked against the stainer columns
-    Map the relevant columns then call the transform
-    
-    - DONE
-
-2. Function that will handle the mapping (Some sort of function that will trace back the ordering)
-    - DONE
-
-3. reindex stainers
-    Reorder the stainer list into another ordering
-
-4. summarise_stainers
-
-5. randomize stainer order
-    Not too sure how important this is but may require some sanity checks if implemented
-
-6. Documentation
-"""
-
 class DirtyDF:
     """
     row_map / col_map stores the initial -> current mapping (row are the old, cols are new)
@@ -50,8 +24,8 @@ class DirtyDF:
             self.rng = default_rng(self.seed)
             self.orig_shape = df.shape
             self.stainers = []
-            self.row_map = np.eye(df.shape[0])
-            self.col_map = np.eye(df.shape[1])
+            self.row_map = {i: [i] for i in range(df.shape[0])} 
+            self.col_map = {i: [i] for i in range(df.shape[1])} 
             self.history = [] 
         
         self.cat_cols = [i for i in range(df.shape[1]) if is_categorical_dtype(df.iloc[:, i])]
@@ -89,8 +63,8 @@ class DirtyDF:
     
     # Print methods
     def summarise_stainers(self):
-        """ Will likely depend on some other method within Stainer """
-        pass
+        for i, stainer in enumerate(self.stainers):
+            print(f"{i+1}. {stainer[0].name}")
 
     def print_history(self):
         tuple(map(lambda x: print(self.history.index(x) + 1, x, sep = ". "), self.history))
@@ -112,7 +86,15 @@ class DirtyDF:
         """
         Reorder stainers
         """
-        pass
+        ddf = self.copy()
+        ddf.stainers = list(map(lambda x: ddf.stainers[x], new_order))
+        
+        return ddf
+    
+    def shuffle_stainers(self):
+        n = len(self.stainers)
+        new_order = self.rng.choice([i for i in range(n)], size = n, replace = False)
+        return self.reindex_stainers(new_order)
     
     def run_stainer(self, idx = 0):
         ddf = self.copy()
@@ -122,22 +104,25 @@ class DirtyDF:
         
         n_row, n_col = self.orig_shape
         
+        default_given = False
         if not row:
             row = [i for i in range(n_row)]
         if not col:
             col = [i for i in range(n_col)]
+            default_given = True
         
-        def convert(x, y):
-            x = np.array(x).reshape(-1)
-            y = np.array(y).reshape(-1)
-            return np.concatenate([x, y]).reshape(-1)
         if use_orig_row:
-            row = list(map(int, reduce(convert,
-                         map(lambda x: np.nonzero(self.row_map[x]), row), ())))
+            final_row = []
+            for ele in row:
+                final_row.extend(self.row_map[ele])
+            row = final_row
+
         if use_orig_col:
-            col = list(map(int, reduce(convert, 
-                         map(lambda x: np.nonzero(self.col_map[x]), col), ())))
-            
+            final_col = []
+            for ele in col:
+                final_col.extend(self.col_map[ele])
+            col = final_col
+        
         col_type = stainer.get_col_type()
         if col_type == "all":
             col = col
@@ -148,16 +133,16 @@ class DirtyDF:
         else:
             input_cols = set(col)
             if col_type in ("category", "cat"):
-                relevant_cols = set(self.cat_cols)
+                relevant_cols = set(ddf.cat_cols)
             if col_type in ("datetime", "date", "time"):
-                relevant_cols = set(self.dt_cols)
+                relevant_cols = set(ddf.dt_cols)
             if col_type in ("numeric", "int", "float"):
-                relevant_cols = set(self.num_cols)
-            if not input_cols.issubset(relevant_cols):
+                relevant_cols = set(ddf.num_cols)
+            if not default_given and not input_cols.issubset(relevant_cols):
                 raise TypeError(f"Column with incorrect column type provided to stainer {stainer.name}, which requires column type {col_type}.")
             else:
                 col = list(input_cols & relevant_cols)
-            
+        
         res = stainer.transform(self.df, self.rng, row, col)
         
         try:
@@ -167,14 +152,20 @@ class DirtyDF:
 
         # Default options
         if not len(row_map):
-            row_map = np.eye(new_df.shape[0])
+            row_map = {i: [i] for i in range(new_df.shape[0])} 
         if not len(col_map):
-            col_map = np.eye(new_df.shape[1])
-
+            col_map = {i: [i] for i in range(new_df.shape[1])} 
+        
         def new_mapping(original, new):
             """
             Given an old mapping and a one-step mapping, returns a mapping that connects the most
             original one to the final mapping 
+            """
+            final_map = {}
+            for k, v in original.items():
+                final_map[k] = []
+                for element in v:
+                    final_map[k].extend(new[element])
             """
             final_map = np.zeros((len(original), len(new[0])))
             for i in range(len(original)):
@@ -184,6 +175,9 @@ class DirtyDF:
                 if len(new_idx):
                     final_map[i][new_idx] = 1
             return final_map
+            """
+            return final_map
+
 
         ddf.row_map = new_mapping(self.row_map, row_map)
         ddf.col_map = new_mapping(self.col_map, col_map)
