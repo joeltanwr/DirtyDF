@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import itertools
 from itertools import product
+from pandas.api.types import is_numeric_dtype, is_datetime64_any_dtype, is_categorical_dtype
+
 
 """Require inflection module for inflection stainer"""
 
@@ -731,7 +733,7 @@ class BinningStainer(Stainer):
         return new_df, {}, {}
 
       
-from latlong import Latlong
+from ddf.latlong import Latlong
 
 class LatlongFormatStainer(Stainer):
     """
