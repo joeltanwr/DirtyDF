@@ -36,7 +36,7 @@ class Stainer:
         row_idx : int list, optional
             Row indices that the stainer will operate on. Default is empty list.
         col_idx : int list, optional
-            Column indicies that the stainer will operate on. Default is empty list.
+            Column indices that the stainer will operate on. Default is empty list.
         """
         self.name = name
         self.row_idx = row_idx
@@ -69,6 +69,11 @@ class Stainer:
     def transform(self, df, rng, row_idx, col_idx):
         """Applies staining on the given indices in the provided dataframe.
         
+        Note
+        ----
+        This method does not return anything and simply raises an error. However, it is expected for the user to implement the transform method 
+        for their custom user-defined stainers.
+
         Parameters
         ----------
         df : pd.DataFrame 
@@ -106,7 +111,7 @@ class Stainer:
         row_idx : int list
             Row indices that the stainer will operate on. Will take priority over the class attribute `row_idx`.
         col_idx : int list
-            Column indicies that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
         Returns
         -------
@@ -115,7 +120,7 @@ class Stainer:
         row_idx : int list
             Processed list of row indices which will be selected for transformation.
         col_idx : int list
-            Processed list of row indices which will be selected for transformation.
+            Processed list of column indices which will be selected for transformation.
         """
         if not isinstance(df, pd.DataFrame):
             raise TypeError('df should be pandas DataFrame')
@@ -259,27 +264,31 @@ class RowDuplicateStainer(Stainer):
         return new_df, row_map, {}
     
 class InflectionStainer(Stainer):
+    """
+    Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.
+    """
     col_type = 'cat'
-    """
-    Stainer to introduce random inflections (capitalization, case format, pluralization) to given categorical columns.
 
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            Columns to perform inflection stainer on. Must be specified.
-        ignore_cats (str list / {int: str list} dict):
-            Category strings to be ignored by stainer.
-            If list: for all columns, ignore all categories present within the list.
-            If dict: maps each col_idx to list of ignored category strings for that particular column.
-        num_format (int):
-            Number of inflection formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
-        formats (str list, or None):
-            List of inflection format options to chooses from. Choose from 'original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 
-            'singularize', 'dasherize', 'humanize', 'titleize', and 'underscore'.
-            If None, all inflections are used.
-    """
     def __init__(self, col_idx = [], name = "Inflection", ignore_cats = [], num_format = -1, formats = None):
+        """The constructor for InflectionStainer class.  
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Inflection".
+        col_idx : int list, optional
+            Column indicies that the stainer will operate on. Default is empty list.
+        ignore_cats : str list or {int: str list}, optional
+            Category strings to be ignored by stainer. If input is string list: for all columns, ignore all categories present within the list.
+            If inut is dict: maps each col_idx to list of ignored category strings for that particular column. Default is empty list.
+        num_format : int, optional
+            Number of inflection formats present within each column. If num_format > number of available formats, 
+            or num_format == -1, use all formats. Default is -1.
+        formats : str list or None, optional
+            List of inflection format options to chooses from. Choose from the following options: {'original', 'uppercase', 'lowercase', 
+            'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize', 'titleize', 'underscore'}. 
+            If None, all inflections are used.
+        """
         super().__init__(name, [], col_idx)
         self.num_format = num_format
         
@@ -298,17 +307,21 @@ class InflectionStainer(Stainer):
             self.formats = ['original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize',
                 'titleize', 'underscore'] #default formats; 10 total inflections + original
 
-    
-    """
-    Parameters:
-        x (str):
-            A category string.
-        formats (str list):
-            A list of string formats.
-            
-    Returns a set of strings, one for each inflection format in formats.
-    """
     def _get_inflected_strings(self, x, formats):
+        """Internal helper to get inflected strings.
+
+        Parameters
+        ----------
+            x : str
+                A category string.
+            formats : str list
+                A list of string formats.
+                
+        Returns
+        -------
+        str set
+            a set of strings, one for each inflection format in formats.
+        """
         import inflection
 
         default_format_map = {
@@ -330,6 +343,28 @@ class InflectionStainer(Stainer):
         return output_set
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Useless parameter as this stainer does not use row indices.
+        col_idx : int list
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_idx : empty dictionary
+            This stainer does not produce any row mappings.
+        col_idx : empty dictionary
+            This stainer does not produce any column mappings.
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
