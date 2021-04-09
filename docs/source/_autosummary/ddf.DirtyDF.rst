@@ -16,6 +16,7 @@
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
    
       DirtyDF
    
