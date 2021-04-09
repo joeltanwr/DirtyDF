@@ -809,16 +809,25 @@ class NullifyStainer(Stainer):
 class BinningStainer(Stainer):
     """
     Stainer that bins continuous columns into discrete groups (each group represents an interval [a,b)).
-    
-            Columns to perform binning on. Must be specified.
-        group_size:
-            Number of elements in each interval group.
-        n_groups:
-            Number of groups to bin to. Ignored if either range or size is not None.
-        sf:
-            Number of significant digits to be used in the output string representation for the intervals.
     """
-    def __init__(self, col_idx, name="Binning", group_size=None, n_groups=5, sf=4):
+    col_type = "numeric"
+
+    def __init__(self, name="Binning", col_idx=[], group_size=None, n_groups=5, sf=4):
+        """The constructor for BinningStainer class.  
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Binning".
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Default is empty list.
+        group_size : int or None, optional
+            Number of elements in each interval group. If None, then uses n_groups. Default is None.
+        n_groups : int, optional
+            Number of interval groups to bin to. Ignored if group_size is not None. Default is 5.
+        sf : int
+            Number of significant digits to be used in the output string representation for the intervals.
+        """
         super().__init__(name, [], col_idx)
         self.type = type
         self.range = range
@@ -828,8 +837,14 @@ class BinningStainer(Stainer):
     
     @staticmethod
     def _bin_into_group(x, cutpoints):
-        """
-        Helper to bin decimal into the correct group.
+        """Helper to bin decimal into the correct group.
+
+        Parameters
+        ----------
+        x : numeric
+            value to bin into a group.
+        cutpoints : numeric list
+            the various cutpoints which define the groups.
         """
         #binary search for upper bound index, which is 'high'
         low=0
@@ -851,6 +866,28 @@ class BinningStainer(Stainer):
 
 
     def transform(self, df, rng, row_idx=None, col_idx=None):
+        """Applies staining on the given indices in the provided dataframe.
+
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Useless parameter as this stainer does not use row indices.
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings.
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()

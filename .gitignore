@@ -3,3 +3,4 @@
 .vscode/*
 __pycache__/*
 ddf/__pycache__/*
+docs/build/*
