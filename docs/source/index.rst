@@ -8,9 +8,6 @@ DirtyDF
 
    ddf
 
-   environment.BuildEnvironment
-   util.relative_uri
-
 
 
 Indices and tables
