@@ -5,19 +5,38 @@ import itertools
 from itertools import product
 from pandas.api.types import is_numeric_dtype, is_datetime64_any_dtype, is_categorical_dtype
 
-
-"""Require inflection module for inflection stainer"""
-
 class Stainer:
-    """ Parent class. Contains basic initailisations meant for all stainers to inherit from"""
+    """Parent Stainer class that contains basic initialisations meant for all stainers to inherit from.
+
+    Note
+    ----
+    This class is not meant to be used on its own, and is meant as the superclass of any custom stainer that may be developed in the future.
+
+    Attributes
+    ----------
+    name : str
+        Name of stainer.
+    row_idx : int list
+        Row indices that the stainer will operate on.
+    col_idx : int list
+        Column indices that the stainer will operate on.
+    col_type : str
+        Column type that the stainer operates on, used for stainer to automatically select viable columns to operate on, if the user does not
+        pass in any col_idx. Currently supports ["all", "category", "cat", "datetime", "date", "time", "numeric", "int", "float"].
+    """
     col_type = "all"
     
     def __init__(self, name = "Unnamed Stainer", row_idx = [], col_idx = []):
-        """ Initialisation.   
-        Args:
-            name(str): Name of stainer
-            row_idx(int list): Row indices that the stainer will operate on
-            col_idx(int list): Column indicies that the stainer will operate on
+        """The constructor for Stainer class.  
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Unnamed Stainer".
+        row_idx : int list, optional
+            Row indices that the stainer will operate on. Default is empty list.
+        col_idx : int list, optional
+            Column indicies that the stainer will operate on. Default is empty list.
         """
         self.name = name
         self.row_idx = row_idx
@@ -26,47 +45,77 @@ class Stainer:
         self.__initialize_history__()
 
     def get_col_type(self):
-        """ Returns the column type that the stainer operates on.
+        """Returns the column type that the stainer operates on.
         
-        Returns:
-            string: Representing column type. Currently supports ["all", "category", "cat", 
-                              "datetime", "date", "time", "numeric", "int", "float"]
+        Returns
+        -------
+        string
+            Column type that the stainer operates on.
         """
         return self.col_type
 
     def get_indices(self):
+        """Returns the row indices and column indices.
+
+        Returns
+        -------
+        row_idx : int list
+            Row indices that the stainer operates on.
+        col_idx : int list
+            Column indices that the stainer operates on.
+        """
         return self.row_idx, self.col_idx
     
     def transform(self, df, rng, row_idx, col_idx):
-        """ Stains dataframe according to the Stainer type.
+        """Applies staining on the given indices in the provided dataframe.
         
-        Args:
-            df (DataFrame): dataframe to be transformed
-            rng (BitGenerator): PCG64 pseudo-random number generator
-            row_idx(int list): Row indices that the stainer will operate on
-            col_idx(int list): Column indicies that the stainer will operate on
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list
+            Row indices that the stainer will operate on. Will take priority over the class attribute `row_idx`.
+        col_idx : int list
+            Column indicies that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
-        Returns:
-            tuple(DataFrame, int:int dictionary, int:int dictionary): Returns the modified dataframe, a row mapping which shows the relationship between 
-            the original row position and the new position, and a column mapping which shows the relationship between the original column position and
-            then new position.
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : dictionary {int: int}
+            Row mapping showing the relationship between the original and new row positions.
+        col_map : dictionary {int: int}
+            Column mapping showing the relationship between the original and new column positions.
         
-        Raises:
-            Exception: Children class does not implement the transform method
+        Raises
+        ------
+        Exception
+            Children class does not implement the transform method.
         """
         raise Exception("Stainer not implemented")
 
     def _init_transform(self, df, row_idx, col_idx):
-        """ Helper method to assign df / row / cols before transforming
+        """Helper method to assign df, row_idx, and col_idx at the start of the self.transform() method.
         
-        Args:
-            df (DataFrame): dataframe to be transformed
-            row_idx(int list): Row indices that the stainer will operate on
-            col_idx(int list): Column indicies that the stainer will operate on
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        row_idx : int list
+            Row indices that the stainer will operate on. Will take priority over the class attribute `row_idx`.
+        col_idx : int list
+            Column indicies that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
-        Returns:
-            tuple(Dataframe, list of integers, list of integers): Returns a copy of the provided dataframe, processed list of 
-            row and column indices which will be selected for transformation.
+        Returns
+        -------
+        new_df : pd.DataFrame 
+            A copy of the input Dataframe.
+        row_idx : int list
+            Processed list of row indices which will be selected for transformation.
+        col_idx : int list
+            Processed list of row indices which will be selected for transformation.
         """
         if not isinstance(df, pd.DataFrame):
             raise TypeError('df should be pandas DataFrame')
@@ -90,10 +139,16 @@ class Stainer:
         self.time += time
     
     def get_history(self):
-        """ Compiles history information and returns it 
+        """Compiles history information for this stainer and returns it.
         
-        Returns:
-            tuple(str, str, float): Returns name of stainer, message for user, and time taken to execute the transform
+        Returns
+        -------
+        name : str
+            Name of stainer.
+        msg : str
+            Message for user.
+        time : float
+            Time taken to execute the self.transform() method.
         """
         msg, time = self.message, self.time
         if not time:
