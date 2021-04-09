@@ -1,4 +1,4 @@
-ddf.errors
+﻿ddf.errors
 ==========
 
 .. automodule:: ddf.errors
@@ -20,6 +20,7 @@ ddf.errors
    .. rubric:: Exceptions
 
    .. autosummary::
+      :toctree:
    
       Error
       InputError

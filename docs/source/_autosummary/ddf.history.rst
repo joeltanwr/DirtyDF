@@ -1,4 +1,4 @@
-ddf.history
+﻿ddf.history
 ===========
 
 .. automodule:: ddf.history
@@ -16,6 +16,7 @@ ddf.history
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
    
       History
    

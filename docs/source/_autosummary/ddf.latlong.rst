@@ -1,4 +1,4 @@
-ddf.latlong
+﻿ddf.latlong
 ===========
 
 .. automodule:: ddf.latlong
@@ -16,6 +16,7 @@ ddf.latlong
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
    
       Latlong
    
