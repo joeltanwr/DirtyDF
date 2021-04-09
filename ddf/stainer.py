@@ -83,7 +83,7 @@ class Stainer:
         row_idx : int list
             Row indices that the stainer will operate on. Will take priority over the class attribute `row_idx`.
         col_idx : int list
-            Column indicies that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
         Returns
         -------
@@ -264,8 +264,7 @@ class RowDuplicateStainer(Stainer):
         return new_df, row_map, {}
     
 class InflectionStainer(Stainer):
-    """
-    Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.
+    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.
     """
     col_type = 'cat'
 
@@ -277,7 +276,7 @@ class InflectionStainer(Stainer):
         name : str, optional
             Name of stainer. Default is "Inflection".
         col_idx : int list, optional
-            Column indicies that the stainer will operate on. Default is empty list.
+            Column indices that the stainer will operate on. Default is empty list.
         ignore_cats : str list or {int: str list}, optional
             Category strings to be ignored by stainer. If input is string list: for all columns, ignore all categories present within the list.
             If inut is dict: maps each col_idx to list of ignored category strings for that particular column. Default is empty list.
@@ -353,16 +352,16 @@ class InflectionStainer(Stainer):
             PCG64 pseudo-random number generator.
         row_idx : int list, optional
             Useless parameter as this stainer does not use row indices.
-        col_idx : int list
+        col_idx : int list, optional
             Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
         Returns
         -------
         new_df : pd.DataFrame
             Modified dataframe.
-        row_idx : empty dictionary
+        row_map : empty dictionary
             This stainer does not produce any row mappings.
-        col_idx : empty dictionary
+        col_map : empty dictionary
             This stainer does not produce any column mappings.
         """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
@@ -408,22 +407,26 @@ class InflectionStainer(Stainer):
         return new_df, {}, {}
 
 class DatetimeFormatStainer(Stainer):
+    """Stainer to alter the format of datetimes for given datetime columns.
+    """
     col_type = "datetime"
-    """
-    Stainer to alter the format of datetimes for given datetime columns.
-    
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            Columns to perform datetime stainer on. Must be specified.
-        num_format (int):
-            Number of datetime formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
-        formats (str list or None):
+
+    def __init__(self, name = "Datetime Formats", col_idx = [], num_format = 2, formats = None):
+        """The constructor for DatetimeFormatStainer class.  
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Datetime Formats".
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Default is empty list.
+        num_format : int, optional
+            Number of datetime formats present within each column. If num_format > number of available formats, 
+            or num_format == -1, use all formats. Default is 2.
+        formats : str list or None, optional
             List of datetime string format options that the DatetimeFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). 
-            If None, a default list of 41 non-ambiguous (month is named) datetime formats are provided.
-    """
-    def __init__(self, col_idx = [], name = "Datetime Formats", num_format = 2, formats = None):
+            If None, a default list of 41 non-ambiguous (month is named) datetime formats are provided. Default is None.
+        """
         import itertools
         
         super().__init__(name, [], col_idx)
@@ -441,6 +444,28 @@ class DatetimeFormatStainer(Stainer):
             
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Useless parameter as this stainer does not use row indices.
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings.
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
@@ -472,22 +497,28 @@ class DatetimeFormatStainer(Stainer):
         return new_df, {}, {}
 
 class DateFormatStainer(DatetimeFormatStainer):
+    """Stainer to alter the format of dates for given date columns.
+
+    Subclass of DatetimeFormatStainer.
+    """
     col_type = "date"
-    """
-    Stainer to alter the format of dates for given date columns.
-    
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            Columns to perform date stainer on.
-        num_format (int):
-            Number of date formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
-        formats (str list or None):
-            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). If None,
-            a default list of 41 non-ambiguous (month is named) date formats are provided.
-    """
-    def __init__(self, col_idx = [], name="Date Formats", num_format = 2, formats = None):
+
+    def __init__(self, name="Date Formats", col_idx = [], num_format = 2, formats = None):
+        """The constructor for DateFormatStainer class.  
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Date Formats".
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Default is empty list.
+        num_format : int, optional
+            Number of date formats present within each column. If num_format > number of available formats, 
+            or num_format == -1, use all formats. Default is 2.
+        formats : str list or None, optional
+            List of date string format options that the DateFormatStainer chooses from. Use datetime module string formats (e.g. '%d%b%Y'). 
+            If None, a default list of 41 non-ambiguous (month is named) date formats are provided. Default is None.
+        """
         if formats == None:
             formats = [f"{dm_y[0]}{br}{dm_y[1]}" for br in [",", ", ", "-", "/", " "]
                         for m_type in ["%b", "%B"]
@@ -500,25 +531,31 @@ class DateFormatStainer(DatetimeFormatStainer):
 
 
 class DatetimeSplitStainer(Stainer):
-    col_type = "datetime"
-    """
-    Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year. 
+    """Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year.
+
     If a given column's name is 'X', then the respective generated column names are 'X_day', 'X_month', and 'X_year'. If keep_time is True,
-    then further generate 'X_hour', 'X_minute', and 'X_second'.
+    then further generate 'X_hour', 'X_minute', and 'X_second'. Otherwise, only dates will be kept.
+
     If a column is split, the original column will be dropped.
+
     For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively. 
-    
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            date columns to perform date splitting on.
-        keep_time (boolean):
-            parameter to set whether time component of datetime should be kept, thus 3 new columns are created. Default is True.
-        prob:
-            probability that the stainer splits a date column. Probabilities of split for each given date column are independent.
     """
-    def __init__(self, col_idx = [], name="Date Split", keep_time = True, prob=1.0):
+    col_type = "datetime"
+
+    def __init__(self, name="Datetime Split", col_idx = [], keep_time = True, prob=1.0):
+        """The constructor for DatetimeSplitStainer class.  
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Datetime Split".
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Default is empty list.
+        keep_time : boolean, optional
+            Whether time component of datetime should be kept, thus 3 new columns are created. Default is True.
+        prob : float [0, 1], optional
+            Probability that the stainer splits a date column. Probabilities of split for each given date column are independent. Default is 1.
+        """
         super().__init__(name, [], col_idx)
         self.keep_time = keep_time
 
@@ -528,6 +565,28 @@ class DatetimeSplitStainer(Stainer):
             self.prob = prob
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Useless parameter as this stainer does not use row indices.
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : dictionary {int: int}
+            Column mapping showing the relationship between the original and new column positions.
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
         start = time()
         
