@@ -1,5 +1,5 @@
-﻿ddf
-===
+﻿DDF API Reference
+=================
 
 .. automodule:: ddf
 
