@@ -1,12 +1,12 @@
 DirtyDF
-=========================================================
+=======
 
-.. autosummary::
-   :toctree: _autosummary
-   :template:
-   :recursive:
+.. toctree::
+   :maxdepth: 2
 
-   ddf
+   _autosummary/ddf_api_reference
+   Getting Started
+   license
 
 
 
