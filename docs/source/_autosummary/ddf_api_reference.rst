@@ -28,7 +28,6 @@
    :recursive:
 
    ddf.DirtyDF
-   ddf.errors
    ddf.history
    ddf.latlong
    ddf.stainer
