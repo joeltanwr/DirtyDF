@@ -1,5 +1,6 @@
 import math
 class Latlong:
+    """ Supporting class to execute Latlong-related stainers """
     #limited to taking in decimal lat and long
     def __init__(self, lat, long):
         self.lat = lat
