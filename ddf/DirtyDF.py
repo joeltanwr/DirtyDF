@@ -9,10 +9,25 @@ from ddf.history import *
 
 class DirtyDF:
     """
-    row_map / col_map stores the initial -> current mapping (row are the old, cols are new)
-        1 represents a map; 0 o/w
+    Dirty DataFrame. Stores information about the dataframe to be stained, previous staining results, 
+    and the mapping of the rows and columns.
+    
+    To be used in conjunction with Stainer class to add and execute stainers.
     """
     def __init__(self, df, seed = None, copy = False):
+        """ 
+        Constructor for DirtyDF
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        seed : int, optional
+            Controls the randomness of the staining process. For a deterministic behaviour, seed has to be fixed to an integer. 
+            If unspecified, will choose a random seed
+        copy : boolean, optional
+            Not for use by user. Determines if a copy of DirtyDF is being created. If True, will copy the details from the previous DDF.
+        """
         self.df = df
         
         if not copy:
@@ -33,15 +48,58 @@ class DirtyDF:
         self.dt_cols = [i for i in range(df.shape[1]) if is_datetime64_any_dtype(df.iloc[:, i])]
     
     def get_df(self):
+        """ Returns the dataframe 
+        
+        Returns
+        ----------
+        df : pd.DataFrame
+            Current dataframe in DDF
+        """
         return self.df
     
     def get_seed(self):
+        """ Returns seed number 
+        
+        Returns
+        ----------
+        seed : int
+            Integer seed used to create Generator for randomisation 
+        """
         return self.seed
     
     def get_rng(self):
+        """ Returns seed generator
+        
+        Returns
+        ----------
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator used for randomisation
+        """
         return self.rng
 
     def get_mapping(self, axis = 0):
+        """ Mapping of rows/cols from original dataframe to most recent dataframe. 
+        A dictionary is returned with information on which index the original rows/cols are displayed in the newest dataframe. 
+        For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, the function will return {3: [2]}
+        
+        Parameters
+        ----------
+        axis : (0/1), optional
+            If 0, returns the row mapping.
+            If 1, returns the col mapping.
+            
+            Defaults to 0
+        
+        Returns
+        ----------
+        map : {int : int list} dictionary 
+            Mapping of original row/col indices to current dataframe's row/col indices.
+            
+        Raises
+        ----------
+        Exception
+            If axis provided is not 0/1
+        """
         if axis in (0, "row"):
             return self.row_map
         if axis in (1, "column"):
@@ -49,6 +107,31 @@ class DirtyDF:
         raise Exception("Invalid axis parameter")
 
     def get_map_from_history(self, index, axis = 0):
+        """ Mapping of rows/cols of the sepcified stainer transformation that had been executed.
+        A dictionary is returned with information on what row/col index right before the specified transformation has converted to after the transformation. 
+        For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, calling index=0 will return {3: [8]} 
+        and calling index=1 will return {8: [2]}
+        
+        Parameters
+        ----------
+        index : int
+            Index of stainer sequence to query mapping. E.g. index=1 will query the mapping performed by the 2nd stainer operation.
+        axis : (0/1), optional
+            If 0, returns the row mapping.
+            If 1, returns the col mapping.
+            
+            Defaults to 0
+        
+        Returns
+        ----------
+        map : {int : int list} dictionary 
+            Mapping of original row/col indices to current dataframe's row/col indices.
+            
+        Raises
+        ----------
+        Exception
+            If axis provided is not 0/1
+        """
         if axis in (0, "row"):
             return self.history[index].get_row_map()
         if axis in (1, "col"):
@@ -56,23 +139,77 @@ class DirtyDF:
         raise Exception("Invalid axis parameter")
         
     def get_previous_map(self, axis = 0):
+        """ Mapping of rows/cols of the most recent stainer transformation that had been executed.
+        A dictionary is returned with information on what row/col index right before the transformation has converted to after the transformation. 
+        For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, the function will return {8: [2]}
+        
+        Parameters
+        ----------
+        axis : (0/1), optional
+            If 0, returns the row mapping.
+            If 1, returns the col mapping.
+            
+            Defaults to 0
+        
+        Returns
+        ----------
+        map : {int : int list} dictionary 
+            Mapping of original row/col indices to current dataframe's row/col indices.
+            
+        Raises
+        ----------
+        Exception
+            If axis provided is not 0/1
+        """
         return self.get_map_from_history(-1, axis)
 
     def reset_rng(self):
+        """ Resets Random Generator object """
         self.rng = default_rng(self.seed)
     
     # Print methods
     def summarise_stainers(self):
+        """ Prints names of stainers that have yet to be executed """
         for i, stainer in enumerate(self.stainers):
             print(f"{i+1}. {stainer[0].name}")
 
     def print_history(self):
+        """ Print historical details of the stainers that have been executed """
         tuple(map(lambda x: print(self.history.index(x) + 1, x, sep = ". "), self.history))
     
-    def __add_history__(self, message, row_map, col_map):
-        self.history.append(History(message, row_map, col_map))
+    def __add_history__(self, data, row_map, col_map):
+        """ Not to be explicitly called by user. Used in conjunction while running stainer to create and add History object to DDF information.
+        
+        Parameters
+        ----------
+        data : (str, str, float) tuple
+            (name of stainer, message, time taken). Contains data to be used to create the History object
+        row_map: {int: int} dictionary 
+            Row mapping showing the relationship between the original and new row positions. Only applies to transformation for the specific stainer.
+        col_map: {int: int} dictionary
+            Column mapping showing the relationship between the original and new column positions. Only applies to transformation for the specific stainer.
+        """
+        self.history.append(History(data, row_map, col_map))
     
     def add_stainers(self, stain, use_orig_row = True, use_orig_col = True):
+        """ Adds a stainer / list of stainers to current list of stainers to be executed.
+        
+        Parameters
+        ----------
+        stain : Stainer or Stainer list 
+            stainers to be added to the DDF to be executed in the future
+        use_orig_row : boolean, optional
+            Indicates if indices in stainer refers to the initial dataframe, or the index of the dataframe at time of execution.
+            If True, indices from initial dataframe are used. Defaults to True
+        use_orig_col : boolean, optional
+            Indicates if indices in stainer refers to the initial dataframe, or the index of the dataframe at time of execution.
+            If True, indices from initial dataframe are used. Defaults to True
+            
+        Returns
+        ----------
+        ddf : DirtyDF
+            Returns new copy of DDF with the stainer added
+        """
         ddf = self.copy()
         if isinstance(stain, Stainer):
             ddf.stainers.append((stain, use_orig_row, use_orig_col))
@@ -84,7 +221,17 @@ class DirtyDF:
         
     def reindex_stainers(self, new_order):
         """
-        Reorder stainers
+        Reorder stainers in a specified order 
+        
+        Parameters
+        ----------
+        new_order : int list
+            Indices of the new order of stainers. If original was [A, B, C] and new_order = [1, 2, 0], the resulting order will be [C, A, B].
+        
+        Returns
+        ----------
+        ddf : DirtyDF
+            Returns new copy of DDF with the stainers rearranged
         """
         ddf = self.copy()
         ddf.stainers = list(map(lambda x: ddf.stainers[x], new_order))
@@ -92,11 +239,32 @@ class DirtyDF:
         return ddf
     
     def shuffle_stainers(self):
+        """
+        Randomly reorder the stainers
+        
+        Returns
+        ----------
+        ddf : DirtyDF
+            Returns new copy of DDF with the stainers rearranged
+        """
         n = len(self.stainers)
         new_order = self.rng.choice([i for i in range(n)], size = n, replace = False)
         return self.reindex_stainers(new_order)
     
     def run_stainer(self, idx = 0):
+        """
+        Applies the transformation of the specified stainer
+        
+        Parameters
+        ----------
+        idx : int, optional
+            Index of stainer to execute. Defaults to 0 (first stainer added)
+            
+        Returns
+        ----------
+        ddf : DirtyDF
+            Returns new DDF after the specified stainer has been executed
+        """
         ddf = self.copy()
         stainer, use_orig_row, use_orig_col = ddf.stainers.pop(idx)
         
@@ -186,13 +354,29 @@ class DirtyDF:
         ddf.df = new_df
         return ddf
     
-    def run_all_stainers(self, rng = None):        
+    def run_all_stainers(self):       
+        """
+        Applies the transformation of all stainers in order
+            
+        Returns
+        ----------
+        ddf : DirtyDF
+            Returns new DDF after all the stainers have been executed
+        """
         current_ddf = self
         for stainer in self.stainers:
             current_ddf = current_ddf.run_stainer()
         return current_ddf
 
     def copy(self):
+        """
+        Creates a copy of the DDF
+        
+        Returns
+        ----------
+        ddf : DirtyDF
+            Returns copy of DDF
+        """
         new_ddf = DirtyDF(self.df.copy(), copy = True)
         new_ddf.seed = self.seed
         new_ddf.rng = self.rng

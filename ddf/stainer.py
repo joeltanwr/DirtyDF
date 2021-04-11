@@ -24,6 +24,7 @@ class Stainer:
         Column type that the stainer operates on, used for stainer to automatically select viable columns to operate on, if the user does not
         pass in any col_idx. Currently supports ["all", "category", "cat", "datetime", "date", "time", "numeric", "int", "float"].
     """
+    #: Defaults to "all", indicating all columns will be selected
     col_type = "all"
     
     def __init__(self, name = "Unnamed Stainer", row_idx = [], col_idx = []):
@@ -89,9 +90,9 @@ class Stainer:
         -------
         new_df : pd.DataFrame
             Modified dataframe.
-        row_map : dictionary {int: int}
+        row_map : {int: int} dictionary 
             Row mapping showing the relationship between the original and new row positions.
-        col_map : dictionary {int: int}
+        col_map : {int: int} dictionary 
             Column mapping showing the relationship between the original and new column positions.
         
         Raises
@@ -140,6 +141,15 @@ class Stainer:
         self.time = 0
     
     def update_history(self, message = "", time = 0):
+        """Used by transform method to set attributes required to display history information
+        
+        Parameters
+        ----------
+        message : str
+            Mesasge to be shown to user about the transformation
+        time: float
+            Time taken to perform the transform
+        """
         self.message += message
         self.time += time
     
@@ -165,12 +175,38 @@ class Stainer:
 class ShuffleStainer(Stainer):
     """ Stainer to randomly rearrange the rows of the DataFrame """
     
-    def __init__(self, name = "Shuffle"):        
+    def __init__(self, name = "Shuffle"):   
+        """ Constructor for ShuffleStainer
+        
+        Parameters
+        ----------
+        name : str, optional
+            Name of stainer. Default is "Shuffle"
+        """
         super().__init__(name, [], [])
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
-        """ 
+        """Applies staining on the given indices in the provided dataframe.
         
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter. All rows will be shuffled regardless
+        col_idx : int list, optional
+            Unused parameter. All columns will be shuffled regardless
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            Row mapping showing the relationship between the original and new row positions.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings.
         """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
@@ -192,29 +228,32 @@ class ShuffleStainer(Stainer):
     
     
 class RowDuplicateStainer(Stainer):
-    """ Stainer to duplicate rows of a dataset.
-    
-    Args:
-        deg (0, 1]:
+    """ Stainer to duplicate rows of a dataset. """  
+    def __init__(self, deg, max_rep = 2, name = "Add Duplicates", row_idx = []):
+        """ Constructor for RowDuplicateStainer 
+        
+        Parameters
+        ----------
+        deg : float (0, 1]
             Proportion of given data that would be duplicated.
             Note: If 5 rows were specified and deg = 0.6, only 3 rows will be duplicated
-        max_rep (2/3/4/5):
+        max_rep : (2/3/4/5), optional
             Maximum number of times a row can appear after duplication. That is, if max_rep = 2, 
             the original row was duplicated once to create 2 copies total.
             Capped at 5 to conserve computational power.
             Defaults to 2
-        name (str):
-            Name of Stainer to be reflected in the printed summaries
-            Defaults to "Add Duplicates"
-        row_idx (int list):
-            Indices of rows which will be considered for duplication (depending on the degree). 
-            Defaults to [], signifying all valid rows will be considered
+        name : str, optional
+            Name of stainer. Default is "Add Duplicates"
+        row_idx : int list, optional
+            Row indices that the stainer will operate on. Default is empty list.
             
-    Raises:
-        ValueError: Degree provided is not in the range of (0, 1]
-        ValueError: max_rep is not in the range of [2, 5]
-    """  
-    def __init__(self, deg, max_rep = 2, name = "Add Duplicates", row_idx = []):
+        Raises
+        ----------
+        ValueError
+            Degree provided is not in the range of (0, 1]
+        ValueError
+            max_rep is not in the range of [2, 5]
+        """
         super().__init__(name, row_idx, [])
         if deg <= 0 or deg > 1:
             raise ValueError("Degree should be in range (0, 1]")
@@ -224,6 +263,28 @@ class RowDuplicateStainer(Stainer):
         self.max_rep = max_rep
 
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Row indices that the stainer will operate on. Default is empty list.
+        col_idx : int list, optional
+            Unused parameter. Columns will be duplicated when new rows are created.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            Row mapping showing the relationship between the original and new row positions.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings. 
+        """
         _, row, col = self._init_transform(df, row_idx, col_idx)
         original_types = df.dtypes
         new_df = []
@@ -264,8 +325,13 @@ class RowDuplicateStainer(Stainer):
         return new_df, row_map, {}
     
 class InflectionStainer(Stainer):
-    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.
+    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.       
+        
+    Note
+    ----
+    This stainer requires the inflection library to work
     """
+    #: Set as "cat" - only categorical columns will be selected for inflection
     col_type = 'cat'
 
     def __init__(self, col_idx = [], name = "Inflection", ignore_cats = [], num_format = -1, formats = None):
@@ -351,7 +417,7 @@ class InflectionStainer(Stainer):
         rng : np.random.BitGenerator
             PCG64 pseudo-random number generator.
         row_idx : int list, optional
-            Useless parameter as this stainer does not use row indices.
+            Unused parameter as this stainer does not use row indices.
         col_idx : int list, optional
             Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
@@ -409,6 +475,7 @@ class InflectionStainer(Stainer):
 class DatetimeFormatStainer(Stainer):
     """Stainer to alter the format of datetimes for given datetime columns.
     """
+    #: Set as "datetime" - only datetime/date/time columns will be selected for formatting
     col_type = "datetime"
 
     def __init__(self, name = "Datetime Formats", col_idx = [], num_format = 2, formats = None):
@@ -453,7 +520,7 @@ class DatetimeFormatStainer(Stainer):
         rng : np.random.BitGenerator
             PCG64 pseudo-random number generator.
         row_idx : int list, optional
-            Useless parameter as this stainer does not use row indices.
+            Unused parameter as this stainer does not use row indices.
         col_idx : int list, optional
             Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
@@ -501,6 +568,7 @@ class DateFormatStainer(DatetimeFormatStainer):
 
     Subclass of DatetimeFormatStainer.
     """
+    #: Set as "date" - only datetime/date columns will be selected for reformatting
     col_type = "date"
 
     def __init__(self, name="Date Formats", col_idx = [], num_format = 2, formats = None):
@@ -538,8 +606,9 @@ class DatetimeSplitStainer(Stainer):
 
     If a column is split, the original column will be dropped.
 
-    For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively. 
+    For 'X_month' and 'X_year', a format from ['m', '%B', '%b'], and ['%Y', '%y'] is randomly chosen respectively.  
     """
+    #: Set as "datetime" - only datetime/date/time columns will be selected for splitting
     col_type = "datetime"
 
     def __init__(self, name="Datetime Split", col_idx = [], keep_time = True, prob=1.0):
@@ -574,7 +643,7 @@ class DatetimeSplitStainer(Stainer):
         rng : np.random.BitGenerator
             PCG64 pseudo-random number generator.
         row_idx : int list, optional
-            Useless parameter as this stainer does not use row indices.
+            Unused parameter as this stainer does not use row indices.
         col_idx : int list, optional
             Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
@@ -652,39 +721,10 @@ class FTransformStainer(Stainer):
     """
     Stainer that takes a numerical column and applies a transformation to it. Only works on numerical columns. 
     If any other column is selected, a type error will be raised.
-    
-    Attributes:
-        col_type(str): 
-            numeric
-        function_dict(str:function dictionary): 
-            7 default functions, namely square, cube, sqrt (square root), cubert (cube root),
-            inverse (1/x), ln (natural logarithm), exp (exponential)
-            
-    Args:
-        deg (0, 1]:
-            Determines the proportion of selected data that would be transformed
-        name (str):
-            Name of Stainer to be reflected in the printed summaries
-            Defaults to "Function Transform"
-        col_idx (int list):
-            Indices of columns which will be considered for transformation (depending on the degree). 
-            Defaults to [], signifying all valid columns will be considered
-        trans_lst(str list):
-            Names of transformations in function_dict to include in the pool of possible transformations
-        trans_dict(str:function dictionary):
-            {Name of transformation: Function} to include in the pool of possible transformations
-        scale(boolean):
-            If True, will scale the data back to its original range. 
-            Defaults to False
-            
-    Raises:
-        ValueError: Degree provided is not in the range of (0, 1]
-        Exception: If multiple functions are given the same name
-        NameError: Name provided in trans_lst is not one of the 7 default transformations
-        TypeError: Invalid column type provided 
-        ZeroDivisionError: Transformation would reuslt in division by zero
     """
+    #: Set as "numeric" - only numeric columns will be selected for transformation
     col_type = "numeric"
+    #: 7 default functions, namely square, cube, sqrt (square root), cubert (cube root), inverse (1/x), ln (natural logarithm), exp (exponential)
     function_dict = {"square": lambda x: x**2,
                  "cube": lambda x: x**3,
                  "sqrt": lambda x: round(x**0.5, 2),
@@ -694,6 +734,40 @@ class FTransformStainer(Stainer):
                  "exp": lambda x: round(np.exp(x), 2)}
     
     def __init__(self, deg, name = "Function Transform", col_idx = [], trans_lst = [], trans_dict = {}, scale = False):
+        """
+        The constructor for FTransformStainer class.  
+        
+        Parameters
+        ----------
+        deg : float (0, 1]
+            Determines the proportion of selected data that would be transformed
+        name : str, optional
+            Name of stainer. Default is "Function Transform"
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Default is empty list.
+        trans_lst : str list, optional
+            Names of transformations in function_dict to include in the pool of possible transformations. Default is empty list.
+        trans_dict : {str : function} dictionary, optional
+            {Name of transformation: Function} to include in the pool of possible transformations. 
+            
+            Default is empty dictionary. If no transformation has been selected, all default functions will be selected instead.
+        scale : boolean
+            If True, will scale the data back to its original range. 
+            Defaults to False
+            
+        Raises
+        ----------
+        ValueError
+            Degree provided is not in the range of (0, 1]
+        Exception
+            If multiple functions are given the same name
+        NameError
+            Name provided in trans_lst is not one of the 7 default transformations
+        TypeError
+            Invalid column type provided 
+        ZeroDivisionError
+            Transformation would reuslt in division by zero
+        """
         super().__init__(name, [], col_idx)
         if deg <= 0 or deg > 1:
             raise ValueError("Degree should be in range (0, 1]")
@@ -711,6 +785,28 @@ class FTransformStainer(Stainer):
         self.scale = scale
     
     def transform(self, df, rng, row_idx, col_idx):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter as this stainer does not use row indices. All rows within the selected columns will be transformed.
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings.
+        """
         new_df, _, cols = self._init_transform(df, row_idx, col_idx)
         start = time()
         
@@ -748,31 +844,35 @@ class FTransformStainer(Stainer):
 class NullifyStainer(Stainer):
     """
     Stainer that convert various values to missing data / values that represent missing values.
-
-    Args:
-        deg (0, 1]:
+    """
+    
+    def __init__(self, deg, name = "Nullify", row_idx = [], col_idx = [], new_val = None, new_type = False):
+        """ The constructor for NullifyStainer class.  
+        
+        Parameters
+        ----------
+        deg : float (0, 1]
             Determines the proportion of selected data that would be nullified
-        name (str):
-            Name of Stainer to be reflected in the printed summaries
-            Defaults to "Nullify"
-        row_idx (int list):
-            Indices of rows which will be considered for transformation (depending on the degree). 
-            Defaults to [], signifying all valid rows will be considered
-        col_idx (int list):
-            Indices of columns which will be considered for transformation (depending on the degree). 
-            Defaults to [], signifying all valid columns will be considered
-        new_val (int/str):
-            Value that would replace the specific data.
-            Defaults to None
-        new_type (boolean):
+        name : str, optional 
+            Name of stainer. Default is "Nullify"
+        row_idx : int list, optional
+            Indices of rows which will be considered for transformation (depending on the degree). Default is empty list
+        col_idx : int list, optional
+            Indices of columns which will be considered for transformation (depending on the degree). Default is empty list
+        new_val : any, optional
+            Value that would replace the specific data. Defaults to None
+        new_type : boolean, optional
             Allows the new_val to be of a different type than the current column.
+            
             Defaults to False (new_val must be same type as the column to be changed)
             
-    Raises:
-        ValueError: Degree provided is not in the range of (0, 1]
-        TypeError: Only when new_type is set to False. Denotes column type is being changed via the addition of the new_val.
-    """
-    def __init__(self, deg, name = "Nullify", row_idx = [], col_idx = [], new_val = None, new_type = False):
+        Raises
+        ----------
+        ValueError
+            Degree provided is not in the range of (0, 1]
+        TypeError
+            Only when new_type is set to False. Denotes column type is being changed via the addition of the new_val.
+        """
         super().__init__(name, row_idx, col_idx)
         if deg <= 0 or deg > 1:
             raise ValueError("Degree should be in range (0, 1]")
@@ -781,6 +881,28 @@ class NullifyStainer(Stainer):
         self.new_type = new_type
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Row indices that the stainer will operate on.
+        col_idx : int list, optional
+            Column indices that the stainer will operate on. 
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings.
+        """
         new_df, row, col = self._init_transform(df, row_idx, col_idx)
         start = time()
         
@@ -810,6 +932,7 @@ class BinningStainer(Stainer):
     """
     Stainer that bins continuous columns into discrete groups (each group represents an interval [a,b)).
     """
+    #:  Set as "numeric" - only numeric columns will be selected for binning
     col_type = "numeric"
 
     def __init__(self, name="Binning", col_idx=[], group_size=None, n_groups=5, sf=4):
@@ -875,7 +998,7 @@ class BinningStainer(Stainer):
         rng : np.random.BitGenerator
             PCG64 pseudo-random number generator.
         row_idx : int list, optional
-            Useless parameter as this stainer does not use row indices.
+            Unused parameter as this stainer does not use row indices.
         col_idx : int list, optional
             Column indices that the stainer will operate on. Will take priority over the class attribute `col_idx`.
         
@@ -924,19 +1047,26 @@ from ddf.latlong import Latlong
 class LatlongFormatStainer(Stainer):
     """
     Stainer to alter the format of datetimes for given latlong columns.
+    """
     
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            Columns to perform latlong stainer on. Must be specified.
-        num_format (int):
-            Number of latlong formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats.
-        formats (str list or None):
+    
+    def __init__(self, col_idx, name="Latlong Formats", num_format = 2, formats = None):
+        """ Constructor for LatlongFormatStainer
+        
+        Parameters
+        ----------
+        col_idx : int list
+            Columns to perform latlong stainer on.
+        name : str, optional
+            Name of stainer. Default is LatlongFormats
+        num_format : int, optional
+            Number of latlong formats present within each column. If num_format > number of available formats, or num_format == -1, use all formats. 
+            Defaults to 2.
+        formats : str list or None, optional
             List of latlong string format options that the LatlongFormatStainer chooses from. Use the Latlong module string formats. 
             If None, a default list of formats are provided.
-    """
-    def __init__(self, col_idx, name="Latlong Formats", num_format = 2, formats = None):
+            Defaults to None.
+        """
         
         super().__init__(name, [], col_idx)
         self.num_format = num_format
@@ -948,6 +1078,28 @@ class LatlongFormatStainer(Stainer):
             
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter as this stainer does not use row indices. 
+        col_idx : int list, optional
+            Column indices that the stainer will operate on.
+            
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : empty dictionary
+            This stainer does not produce any column mappings.
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
@@ -984,16 +1136,25 @@ class LatlongSplitStainer(Stainer):
     If a given column's name is 'X', then the respective generated column names 'X_lat_deg', 'X_lat_min', 'X_lat_sec', 'X_long_deg', 'X_long_min',
     and 'X_long_sec'.
     If a column is split, the original column will be dropped.
-    
-    Parameters:
-        name (str):
-            Name of stainer.
-        col_idx (int list):
-            latlong columns to perform latlong splitting on. Must be specified.
-        prob:
-            probability that the stainer splits a latlong column. Probabilities of split for each given date column are independent.
     """
     def __init__(self, col_idx, name="Latlong Split", prob=1.0):
+        """ Constructor for LatlongSplitStainer
+        
+        Parameters
+        ----------
+        col_idx : int list
+            latlong columns to perform latlong splitting on.
+        name : str, optional
+            Name of stainer. Default is Latlong Split. 
+        prob : float [0, 1], optional
+            probability that the stainer splits a latlong column. Probabilities of split for each given date column are independent.
+            Defaults to 1.
+            
+        Raises
+        ----------
+        ValueError:
+            Probability provided is not in the range of [0, 1]
+        """
         super().__init__(name, [], col_idx)
 
         if prob < 0 or prob > 1:
@@ -1002,6 +1163,28 @@ class LatlongSplitStainer(Stainer):
             self.prob = prob
         
     def transform(self, df, rng, row_idx = None, col_idx = None):
+        """Applies staining on the given indices in the provided dataframe.
+
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter as this stainer does not use row indices. 
+        col_idx : int list, optional
+            Column indices that the stainer will operate on.
+            
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe.
+        row_map : empty dictionary
+            This stainer does not produce any row mappings.
+        col_map : empty dictionary
+            Column mapping showing the relationship between the original and new column positions.
+        """
         new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
 
         start = time()
