@@ -1,6 +1,8 @@
 ﻿ddf.DirtyDF
 ===========
 
+Contains the DirtyDF class.
+
 .. automodule:: ddf.DirtyDF
 
    
