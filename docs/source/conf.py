@@ -27,11 +27,16 @@ author = 'Vik Gopal, Joel Tan, Justin Lo'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx.ext.autosummary'
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx.ext.autosummary','sphinx_gallery.gen_gallery',
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 autosummary_generate_overwrite = False
+
+sphinx_gallery_conf = {
+     'examples_dirs': '..\\..\\examples_for_gallery',   # path to your example scripts
+     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

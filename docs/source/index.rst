@@ -5,7 +5,7 @@ DirtyDF
    :maxdepth: 2
 
    _autosummary/ddf_api_reference
-   Getting Started
+   auto_examples/index
    license
 
 
