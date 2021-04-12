@@ -4,3 +4,4 @@
 __pycache__/*
 ddf/__pycache__/*
 docs/build/*
+self_testing/*
