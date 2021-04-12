@@ -6,8 +6,14 @@ ddf.stainer.ShuffleStainer
 .. autoclass:: ShuffleStainer
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: get_col_type
+      .. automethod:: get_history
+      .. automethod:: get_indices
+      .. automethod:: transform
+      .. automethod:: update_history
+   
    
    .. rubric:: Methods
 
@@ -19,15 +25,5 @@ ddf.stainer.ShuffleStainer
       ~ShuffleStainer.get_indices
       ~ShuffleStainer.transform
       ~ShuffleStainer.update_history
-   
-   
-
-   
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~ShuffleStainer.col_type
    
    

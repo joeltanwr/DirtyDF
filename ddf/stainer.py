@@ -325,11 +325,7 @@ class RowDuplicateStainer(Stainer):
         return new_df, row_map, {}
     
 class InflectionStainer(Stainer):
-    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.       
-        
-    Note
-    ----
-    This stainer requires the inflection library to work
+    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.
     """
     #: Set as "cat" - only categorical columns will be selected for inflection
     col_type = 'cat'
