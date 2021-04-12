@@ -6,8 +6,14 @@ ddf.stainer.DateFormatStainer
 .. autoclass:: DateFormatStainer
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: get_col_type
+      .. automethod:: get_history
+      .. automethod:: get_indices
+      .. automethod:: transform
+      .. automethod:: update_history
+   
    
    .. rubric:: Methods
 
@@ -19,15 +25,5 @@ ddf.stainer.DateFormatStainer
       ~DateFormatStainer.get_indices
       ~DateFormatStainer.transform
       ~DateFormatStainer.update_history
-   
-   
-
-   
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~DateFormatStainer.col_type
    
    

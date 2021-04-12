@@ -1,4 +1,4 @@
-ddf.DirtyDF.DirtyDF
+﻿ddf.DirtyDF.DirtyDF
 ===================
 
 .. currentmodule:: ddf.DirtyDF
@@ -6,8 +6,24 @@ ddf.DirtyDF.DirtyDF
 .. autoclass:: DirtyDF
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: add_stainers
+      .. automethod:: copy
+      .. automethod:: get_df
+      .. automethod:: get_map_from_history
+      .. automethod:: get_mapping
+      .. automethod:: get_previous_map
+      .. automethod:: get_rng
+      .. automethod:: get_seed
+      .. automethod:: print_history
+      .. automethod:: reindex_stainers
+      .. automethod:: reset_rng
+      .. automethod:: run_all_stainers
+      .. automethod:: run_stainer
+      .. automethod:: shuffle_stainers
+      .. automethod:: summarise_stainers
+   
    
    .. rubric:: Methods
 
@@ -29,9 +45,5 @@ ddf.DirtyDF.DirtyDF
       ~DirtyDF.run_stainer
       ~DirtyDF.shuffle_stainers
       ~DirtyDF.summarise_stainers
-   
-   
-
-   
    
    

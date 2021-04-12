@@ -6,8 +6,14 @@ ddf.stainer.Stainer
 .. autoclass:: Stainer
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: get_col_type
+      .. automethod:: get_history
+      .. automethod:: get_indices
+      .. automethod:: transform
+      .. automethod:: update_history
+   
    
    .. rubric:: Methods
 
@@ -19,15 +25,5 @@ ddf.stainer.Stainer
       ~Stainer.get_indices
       ~Stainer.transform
       ~Stainer.update_history
-   
-   
-
-   
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~Stainer.col_type
    
    
