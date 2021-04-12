@@ -6,8 +6,14 @@ ddf.stainer.DatetimeSplitStainer
 .. autoclass:: DatetimeSplitStainer
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: get_col_type
+      .. automethod:: get_history
+      .. automethod:: get_indices
+      .. automethod:: transform
+      .. automethod:: update_history
+   
    
    .. rubric:: Methods
 
@@ -19,15 +25,5 @@ ddf.stainer.DatetimeSplitStainer
       ~DatetimeSplitStainer.get_indices
       ~DatetimeSplitStainer.transform
       ~DatetimeSplitStainer.update_history
-   
-   
-
-   
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~DatetimeSplitStainer.col_type
    
    

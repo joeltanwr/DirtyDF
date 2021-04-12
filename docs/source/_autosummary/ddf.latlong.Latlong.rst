@@ -1,4 +1,4 @@
-ddf.latlong.Latlong
+﻿ddf.latlong.Latlong
 ===================
 
 .. currentmodule:: ddf.latlong
@@ -6,8 +6,12 @@ ddf.latlong.Latlong
 .. autoclass:: Latlong
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: deg_to_dms
+      .. automethod:: df_to_latlong
+      .. automethod:: strflatlong
+   
    
    .. rubric:: Methods
 
@@ -17,9 +21,5 @@ ddf.latlong.Latlong
       ~Latlong.deg_to_dms
       ~Latlong.df_to_latlong
       ~Latlong.strflatlong
-   
-   
-
-   
    
    

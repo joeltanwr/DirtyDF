@@ -1,4 +1,4 @@
-ddf.history.History
+﻿ddf.history.History
 ===================
 
 .. currentmodule:: ddf.history
@@ -6,8 +6,11 @@ ddf.history.History
 .. autoclass:: History
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: get_col_map
+      .. automethod:: get_row_map
+   
    
    .. rubric:: Methods
 
@@ -16,9 +19,5 @@ ddf.history.History
       ~History.__init__
       ~History.get_col_map
       ~History.get_row_map
-   
-   
-
-   
    
    

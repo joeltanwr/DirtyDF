@@ -6,8 +6,14 @@ ddf.stainer.LatlongFormatStainer
 .. autoclass:: LatlongFormatStainer
 
    
-   .. automethod:: __init__
-
+   
+      .. automethod:: __init__
+      .. automethod:: get_col_type
+      .. automethod:: get_history
+      .. automethod:: get_indices
+      .. automethod:: transform
+      .. automethod:: update_history
+   
    
    .. rubric:: Methods
 
@@ -19,15 +25,5 @@ ddf.stainer.LatlongFormatStainer
       ~LatlongFormatStainer.get_indices
       ~LatlongFormatStainer.transform
       ~LatlongFormatStainer.update_history
-   
-   
-
-   
-   
-   .. rubric:: Attributes
-
-   .. autosummary::
-   
-      ~LatlongFormatStainer.col_type
    
    
