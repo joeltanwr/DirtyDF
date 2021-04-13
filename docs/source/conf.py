@@ -33,9 +33,12 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon'
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 autosummary_generate_overwrite = False
 
+from sphinx_gallery.sorting import FileNameSortKey
+
 sphinx_gallery_conf = {
      'examples_dirs': '..\\..\\examples_for_gallery',   # path to your example scripts
      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+     'within_subsection_order': FileNameSortKey
 }
 
 # Add any paths that contain templates here, relative to this directory.
