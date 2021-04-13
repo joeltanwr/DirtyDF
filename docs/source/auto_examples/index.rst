@@ -30,6 +30,69 @@ Below is a collection of simple examples to get you started on DirtyDFs and Stai
    :hidden:
 
    /auto_examples/plot_basic_stainer_example
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This page shows some basic examples of using DirtyDF, and applying stainers to transform them.">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_plot_dirty_df_example_thumb.png
+     :alt: Basic Usage of DirtyDF with Stainers
+
+     :ref:`sphx_glr_auto_examples_plot_dirty_df_example.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_dirty_df_example
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This page shows some typical use-cases of &#x27;chainstaining&#x27; multiple stainers together to produce...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_plot_stainchaining_example_thumb.png
+     :alt: Chaining Multiple Stainers on DirtyDF
+
+     :ref:`sphx_glr_auto_examples_plot_stainchaining_example.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_stainchaining_example
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This page shows an example of how to create your own user-defined custom stainers, which subcla...">
+
+.. only:: html
+
+ .. figure:: /auto_examples/images/thumb/sphx_glr_plot_user_defined_stainer_example_thumb.png
+     :alt: User-defined Custom Stainers
+
+     :ref:`sphx_glr_auto_examples_plot_user_defined_stainer_example.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_user_defined_stainer_example
 .. raw:: html
 
     <div class="sphx-glr-clear"></div>
