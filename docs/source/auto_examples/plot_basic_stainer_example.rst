@@ -30,7 +30,7 @@ This page shows some basic examples of using stainers to directly transform pand
 
     import pandas as pd
     import numpy as np
-    from ddf.stainer import ShuffleStainer, InflectionStainer, DatetimeFormatStainer, DatetimeSplitStainer
+    from ddf.stainer import ShuffleStainer, InflectionStainer
 
 
 
@@ -268,7 +268,7 @@ had transformed the dataframe, and the time taken for said transformation.
  .. code-block:: none
 
 
-    ('Shuffle', 'Order of rows randomized', 0.002023458480834961)
+    ('Shuffle', 'Order of rows randomized', 0.0019943714141845703)
 
 
 
@@ -465,20 +465,20 @@ and ignore inflections on the 'Dog' category in the first class and 'Cow' & 'She
         <tr>
           <th>0</th>
           <td>0</td>
-          <td>Cat</td>
-          <td>horse</td>
+          <td>Cats</td>
+          <td>Horses</td>
         </tr>
         <tr>
           <th>1</th>
           <td>1</td>
-          <td>rabbit</td>
+          <td>Rabbit</td>
           <td>Cow</td>
         </tr>
         <tr>
           <th>2</th>
           <td>2</td>
           <td>Dog</td>
-          <td>horse</td>
+          <td>Horses</td>
         </tr>
         <tr>
           <th>3</th>
@@ -520,12 +520,12 @@ We can see the new distributions.
 
 
     Dog        33
-    Rabbits    16
-    Rabbit     15
-    Cats       10
+    rabbit     16
+    Rabbits    15
     cat        10
-    rabbit      9
-    Cat         7
+    Cat        10
+    Rabbit      9
+    Cats        7
     Name: class, dtype: int64
 
 
@@ -549,12 +549,12 @@ We can see the new distributions.
 
     Sheep     27
     Cow       24
-    Goat      12
-    horse     11
-    goat       8
-    Horses     6
-    Goats      6
+    Goats     12
+    Horses    11
+    Goat       8
     Horse      6
+    horse      6
+    goat       6
     Name: class2, dtype: int64
 
 
@@ -580,7 +580,7 @@ We can also check the description of the stainer's transform from its history (t
  .. code-block:: none
 
     Categorical inflections on:
-    {'class': {'Cat': ['cat', 'Cat', 'Cats'], 'Rabbit': ['Rabbit', 'Rabbits', 'rabbit']}, 'class2': {'Horse': ['Horses', 'horse', 'Horse'], 'Goat': ['Goat', 'Goats', 'goat']}}
+    {'class': {'Cat': ['Cat', 'Cats', 'cat'], 'Rabbit': ['Rabbits', 'rabbit', 'Rabbit']}, 'class2': {'Horse': ['horse', 'Horses', 'Horse'], 'Goat': ['Goats', 'goat', 'Goat']}}
 
 
 
@@ -592,7 +592,7 @@ For more info on each of the stainer's use-cases and input parameters, do check 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.029 seconds)
+   **Total running time of the script:** ( 0 minutes  0.035 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_basic_stainer_example.py:
