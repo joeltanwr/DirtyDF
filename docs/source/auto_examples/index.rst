@@ -33,7 +33,7 @@ Below is a collection of simple examples to get you started on DirtyDFs and Stai
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This page shows some basic examples of using DirtyDF, and applying stainers to transform them.">
+    <div class="sphx-glr-thumbcontainer" tooltip="This page shows some basic examples of using DirtyDF, and applying stainers to transform them. ...">
 
 .. only:: html
 
@@ -58,10 +58,10 @@ Below is a collection of simple examples to get you started on DirtyDFs and Stai
 
 .. only:: html
 
- .. figure:: /auto_examples/images/thumb/sphx_glr_plot_stainchaining_example_thumb.png
-     :alt: Chaining Multiple Stainers on DirtyDF
+ .. figure:: /auto_examples/images/thumb/sphx_glr_plot_retail_stainchaining_example_thumb.png
+     :alt: Retail Dataset Example
 
-     :ref:`sphx_glr_auto_examples_plot_stainchaining_example.py`
+     :ref:`sphx_glr_auto_examples_plot_retail_stainchaining_example.py`
 
 .. raw:: html
 
@@ -71,7 +71,7 @@ Below is a collection of simple examples to get you started on DirtyDFs and Stai
 .. toctree::
    :hidden:
 
-   /auto_examples/plot_stainchaining_example
+   /auto_examples/plot_retail_stainchaining_example
 
 .. raw:: html
 

@@ -8,7 +8,7 @@ This page shows some basic examples of using stainers to directly transform pand
 
 import pandas as pd
 import numpy as np
-from ddf.stainer import ShuffleStainer, InflectionStainer, DatetimeFormatStainer, DatetimeSplitStainer
+from ddf.stainer import ShuffleStainer, InflectionStainer
 
 # %%
 # ShuffleStainer Example
