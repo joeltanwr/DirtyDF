@@ -43,4 +43,23 @@ retail.InvoiceDate.describe(datetime_is_numeric=True)
 # We can see that the entire dataset consists of invoices within a month, and times are included.
 
 # %%
-# We now initiate our stainers.
+# We now initiate our stainers. It is possible to change the name of the Stainer to reflect the output seen when
+# printing the history
+retail_ddf = DirtyDF(retail, seed = 42) # Create DDF
+dt_split_stainer = DatetimeSplitStainer(name = "Date Split", keep_time = False) # Only split the date
+
+# %%
+# Since the col_type of the DatetimeSplitStainer is set to "datetime", it will automatically identify datetime columns
+# and only execute the stainer on those columns. Note that this only applies when using a DDF. If using the stainer directly,
+# the column number needs to be specified
+retail_transformed = retail_ddf.add_stainers(dt_split_stainer).run_stainer()
+retail_transformed.get_df().head()
+
+new_retail_df, row_map, col_map = dt_split_stainer.transform(retail, np.random.default_rng(42), col_idx = [4])
+
+# %%
+# Since the DatetimeSpitStainer adds columns, we can check the column mapping to see how the columns were changed
+retail_transformed.get_mapping(axis = 1) # or col_map if using the Stainer directly
+
+
+
