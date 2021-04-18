@@ -326,10 +326,6 @@ class RowDuplicateStainer(Stainer):
     
 class InflectionStainer(Stainer):
     """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.       
-        
-    Note
-    ----
-    This stainer requires the inflection library to work
     """
     #: Set as "cat" - only categorical columns will be selected for inflection
     col_type = 'cat'
