@@ -325,7 +325,11 @@ class RowDuplicateStainer(Stainer):
         return new_df, row_map, {}
     
 class InflectionStainer(Stainer):
-    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.
+    """Stainer to introduce random string inflections (e.g. capitalization, case format, pluralization) to given categorical columns.       
+        
+    Note
+    ----
+    This stainer requires the inflection library to work
     """
     #: Set as "cat" - only categorical columns will be selected for inflection
     col_type = 'cat'
@@ -349,6 +353,11 @@ class InflectionStainer(Stainer):
             List of inflection format options to chooses from. Choose from the following options: {'original', 'uppercase', 'lowercase', 
             'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize', 'titleize', 'underscore'}. 
             If None, all inflections are used.
+            
+        Raises
+        ----------
+        KeyError
+            Format provided is not within the default 11 formats possible
         """
         super().__init__(name, [], col_idx)
         self.num_format = num_format
@@ -362,11 +371,17 @@ class InflectionStainer(Stainer):
         else:
             raise TypeError("ignore_cats must be either a list of strings, or a dictionary mapping column index to list of strings")
 
-        if formats:
-            self.formats = formats
-        else:
-            self.formats = ['original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize',
+        all_formats = ['original', 'uppercase', 'lowercase', 'capitalize', 'camelize', 'pluralize', 'singularize', 'dasherize', 'humanize',
                 'titleize', 'underscore'] #default formats; 10 total inflections + original
+        if formats:
+            self.formats = []
+            for f in formats:
+                if f in all_formats:
+                    self.formats.append(f)
+                else:
+                    raise KeyError(f"Invalid format: {f}. Please see documentation for possible options")
+        else:
+            self.formats = all_formats.copy()
 
     def _get_inflected_strings(self, x, formats):
         """Internal helper to get inflected strings.
@@ -757,7 +772,7 @@ class FTransformStainer(Stainer):
             Degree provided is not in the range of (0, 1]
         Exception
             If multiple functions are given the same name
-        NameError
+        KeyError
             Name provided in trans_lst is not one of the 7 default transformations
         TypeError
             Invalid column type provided 
