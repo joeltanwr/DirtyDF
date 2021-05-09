@@ -5,3 +5,7 @@ __pycache__/*
 ddf/__pycache__/*
 docs/build/*
 self_testing/*
+cert_stuff/*
+'test notebooks/connecting_to_LumiNUS.ipynb'
+connecting_to_LumiNUS.ipynb
+test_https_notebook.ipynb
