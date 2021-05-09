@@ -36,7 +36,7 @@ autosummary_generate_overwrite = False
 from sphinx_gallery.sorting import FileNameSortKey
 
 sphinx_gallery_conf = {
-     'examples_dirs': '..\\..\\examples_for_gallery',   # path to your example scripts
+     'examples_dirs': os.path.join('..','..','examples_for_gallery'),   # path to your example scripts
      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
      'within_subsection_order': FileNameSortKey
 }
