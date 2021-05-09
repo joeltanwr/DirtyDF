@@ -24,10 +24,334 @@ Retail Dataset Example
 This page shows some typical use-cases of 'chainstaining' multiple stainers together to produce several distinct transformed
 DirtyDFs, based on a retail dataset. We expect these types of procedures to be the most common use-case of this library.
 
+.. GENERATED FROM PYTHON SOURCE LINES 9-14
+
+.. code-block:: default
+
+    import pandas as pd
+    import numpy as np
+    from ddf.stainer import ShuffleStainer, InflectionStainer, NullifyStainer, DatetimeFormatStainer, DatetimeSplitStainer
+    from ddf.DirtyDF import DirtyDF
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 15-16
+
+We load the dataset and view some basic dataset properties.
+
+.. GENERATED FROM PYTHON SOURCE LINES 16-19
+
+.. code-block:: default
+
+    retail = pd.read_csv("../data/online_retail_small.csv", parse_dates = ["InvoiceDate"])
+    retail.info()
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 5000 entries, 0 to 4999
+    Data columns (total 8 columns):
+     #   Column       Non-Null Count  Dtype         
+    ---  ------       --------------  -----         
+     0   InvoiceNo    5000 non-null   object        
+     1   StockCode    5000 non-null   object        
+     2   Description  4988 non-null   object        
+     3   Quantity     5000 non-null   int64         
+     4   InvoiceDate  5000 non-null   datetime64[ns]
+     5   UnitPrice    5000 non-null   float64       
+     6   CustomerID   3795 non-null   float64       
+     7   Country      5000 non-null   object        
+    dtypes: datetime64[ns](1), float64(2), int64(1), object(4)
+    memory usage: 312.6+ KB
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 20-22
+
+.. code-block:: default
+
+    retail.head()
+
+
+
+
+
+
+.. raw:: html
+
+    <div class="output_subarea output_html rendered_html output_result">
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>InvoiceNo</th>
+          <th>StockCode</th>
+          <th>Description</th>
+          <th>Quantity</th>
+          <th>InvoiceDate</th>
+          <th>UnitPrice</th>
+          <th>CustomerID</th>
+          <th>Country</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>0</th>
+          <td>536365</td>
+          <td>85123A</td>
+          <td>WHITE HANGING HEART T-LIGHT HOLDER</td>
+          <td>6</td>
+          <td>2010-01-12 08:26:00</td>
+          <td>2.55</td>
+          <td>17850.0</td>
+          <td>United Kingdom</td>
+        </tr>
+        <tr>
+          <th>1</th>
+          <td>536365</td>
+          <td>71053</td>
+          <td>WHITE METAL LANTERN</td>
+          <td>6</td>
+          <td>2010-01-12 08:26:00</td>
+          <td>3.39</td>
+          <td>17850.0</td>
+          <td>United Kingdom</td>
+        </tr>
+        <tr>
+          <th>2</th>
+          <td>536365</td>
+          <td>84406B</td>
+          <td>CREAM CUPID HEARTS COAT HANGER</td>
+          <td>8</td>
+          <td>2010-01-12 08:26:00</td>
+          <td>2.75</td>
+          <td>17850.0</td>
+          <td>United Kingdom</td>
+        </tr>
+        <tr>
+          <th>3</th>
+          <td>536365</td>
+          <td>84029G</td>
+          <td>KNITTED UNION FLAG HOT WATER BOTTLE</td>
+          <td>6</td>
+          <td>2010-01-12 08:26:00</td>
+          <td>3.39</td>
+          <td>17850.0</td>
+          <td>United Kingdom</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>536365</td>
+          <td>84029E</td>
+          <td>RED WOOLLY HOTTIE WHITE HEART.</td>
+          <td>6</td>
+          <td>2010-01-12 08:26:00</td>
+          <td>3.39</td>
+          <td>17850.0</td>
+          <td>United Kingdom</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    </div>
+    <br />
+    <br />
+
+.. GENERATED FROM PYTHON SOURCE LINES 23-24
+
+Convert 'Country' column to 'category' type.
+
+.. GENERATED FROM PYTHON SOURCE LINES 24-26
+
+.. code-block:: default
+
+    retail["Country"] = retail.Country.astype("category")
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 27-30
+
+We can stain the dataset in various ways; in particular, since there is a datetime component in this dataset,
+we can use the DatetimeFormatStainer and DatetimeSplitStainer.
+We can also add simple ShuffleStainer, NullifyStainer, and apply InflectionStainer on the countries as well.
+
+.. GENERATED FROM PYTHON SOURCE LINES 32-33
+
+We first view the distribution of the Country column to see if inflection staining is applicable here.
+
+.. GENERATED FROM PYTHON SOURCE LINES 33-35
+
+.. code-block:: default
+
+    retail.Country.value_counts()
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    United Kingdom    4837
+    Norway              73
+    Germany             30
+    EIRE                24
+    France              20
+    Australia           14
+    Netherlands          2
+    Name: Country, dtype: int64
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 36-37
+
+We can see that lowercase and uppercase inflections are applicable here, aside from the 'EIRE' category, which we can ignore.
+
+.. GENERATED FROM PYTHON SOURCE LINES 39-40
+
+We now check the numeric distribution of the datetime column to see if datetime staining is applicable here.
+
+.. GENERATED FROM PYTHON SOURCE LINES 40-42
+
+.. code-block:: default
+
+    retail.InvoiceDate.describe(datetime_is_numeric=True)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    count                          5000
+    mean     2010-01-24 07:21:03.612000
+    min             2010-01-12 08:26:00
+    25%             2010-01-12 13:24:00
+    50%             2010-01-12 17:06:00
+    75%             2010-02-12 12:10:00
+    max             2010-02-12 18:08:00
+    Name: InvoiceDate, dtype: object
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 43-44
+
+We can see that the entire dataset consists of invoices within a month, and times are included.
+
+.. GENERATED FROM PYTHON SOURCE LINES 46-48
+
+We now initiate our stainers. It is possible to change the name of the Stainer to reflect the output seen when
+printing the history
+
+.. GENERATED FROM PYTHON SOURCE LINES 48-51
+
+.. code-block:: default
+
+    retail_ddf = DirtyDF(retail, seed = 42) # Create DDF
+    dt_split_stainer = DatetimeSplitStainer(name = "Date Split", keep_time = False) # Only split the date
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 52-55
+
+Since the col_type of the DatetimeSplitStainer is set to "datetime", it will automatically identify datetime columns
+and only execute the stainer on those columns. Note that this only applies when using a DDF. If using the stainer directly,
+the column number needs to be specified
+
+.. GENERATED FROM PYTHON SOURCE LINES 55-60
+
+.. code-block:: default
+
+    retail_transformed = retail_ddf.add_stainers(dt_split_stainer).run_stainer()
+    retail_transformed.get_df().head()
+
+    new_retail_df, row_map, col_map = dt_split_stainer.transform(retail, np.random.default_rng(42), col_idx = [4])
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 61-62
+
+Since the DatetimeSpitStainer adds columns, we can check the column mapping to see how the columns were changed
+
+.. GENERATED FROM PYTHON SOURCE LINES 62-66
+
+.. code-block:: default
+
+    retail_transformed.get_mapping(axis = 1) # or col_map if using the Stainer directly
+
+
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+
+    {0: [0], 1: [1], 2: [2], 3: [3], 4: [4, 5, 6], 5: [7], 6: [8], 7: [9]}
+
+
+
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
+   **Total running time of the script:** ( 0 minutes  0.288 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_retail_stainchaining_example.py:
