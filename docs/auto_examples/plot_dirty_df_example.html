@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Basic Usage of DirtyDF with Stainers &mdash; DirtyDF  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-rendered-html.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Retail Dataset Example" href="plot_retail_stainchaining_example.html" />
+    <link rel="prev" title="Basic Usage of Stainers (no DirtyDF)" href="plot_basic_stainer_example.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> DirtyDF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/ddf_api_reference.html">DDF API Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_basic_stainer_example.html">Basic Usage of Stainers (no DirtyDF)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Basic Usage of DirtyDF with Stainers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#single-stainer-example">Single Stainer Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-stainers-example">Multiple Stainers Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plot_retail_stainchaining_example.html">Retail Dataset Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_user_defined_stainer_example.html">User-defined Custom Stainers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DirtyDF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Getting Started</a> &raquo;</li>
+        
+      <li>Basic Usage of DirtyDF with Stainers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/auto_examples/plot_dirty_df_example.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-dirty-df-example-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="basic-usage-of-dirtydf-with-stainers">
+<span id="sphx-glr-auto-examples-plot-dirty-df-example-py"></span><h1>Basic Usage of DirtyDF with Stainers<a class="headerlink" href="#basic-usage-of-dirtydf-with-stainers" title="Permalink to this headline">¶</a></h1>
+<p>This page shows some basic examples of using DirtyDF, and applying stainers to transform them. We recommend you go through the
+Basic Usage of Stainers (no DirtyDF) example first.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ddf.stainer</span> <span class="kn">import</span> <span class="n">ShuffleStainer</span><span class="p">,</span> <span class="n">InflectionStainer</span><span class="p">,</span> <span class="n">RowDuplicateStainer</span>
+<span class="kn">from</span> <span class="nn">ddf.DirtyDF</span> <span class="kn">import</span> <span class="n">DirtyDF</span>
+</pre></div>
+</div>
+<div class="section" id="single-stainer-example">
+<h2>Single Stainer Example<a class="headerlink" href="#single-stainer-example" title="Permalink to this headline">¶</a></h2>
+<p>For the first example, let us once again use the basic dataset containing only 6 rows and 2 columns,
+an integer ID and an animal class.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Cat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Dog&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Rabbit&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Cat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;Cat&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Dog&#39;</span><span class="p">)],</span>
+                  <span class="n">columns</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;class&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Let us convert the pandas dataframe into a DirtyDF object. We specify a seed for the numpy random generator. This generator will
+be used for the staining.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf</span> <span class="o">=</span> <span class="n">DirtyDF</span><span class="p">(</span><span class="n">animal</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="mi">123</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let us use only 1 stainer: ShuffleStainer, for now.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shuffle_stainer</span> <span class="o">=</span> <span class="n">ShuffleStainer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Instead of calling on the stainer’s transform method directly, we now add the stainer into the DirtyDF object, to be used later when
+calling the DDF.run_stainer() method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf2</span> <span class="o">=</span> <span class="n">animal_ddf</span><span class="o">.</span><span class="n">add_stainers</span><span class="p">(</span><span class="n">shuffle_stainer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that the DDF methods return new DDF objects, and do not change the DDF in-place. This can be verified by checking the current
+stainers stored in a DDF using the .summarise_stainers() method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf</span><span class="o">.</span><span class="n">summarise_stainers</span><span class="p">()</span> <span class="c1">#empty</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf2</span><span class="o">.</span><span class="n">summarise_stainers</span><span class="p">()</span> <span class="c1">#ShuffleStainer present</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1. Shuffle
+</pre></div>
+</div>
+<p>We run the stainer by calling the .run_stainer() method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf3</span> <span class="o">=</span> <span class="n">animal_ddf2</span><span class="o">.</span><span class="n">run_stainer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that same as before, the above call returns a new DDF object. To view the dataframe content of the DDF object, we can use the
+.get_df() method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf3</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>4</td>
+      <td>Cat</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>Cat</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>Rabbit</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>Cat</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>Dog</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5</td>
+      <td>Dog</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><p>Notice that animal_ddf2 still contains the original df, and contains ShuffleStainer inside, but not yet run.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf2</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>Cat</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1</td>
+      <td>Dog</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2</td>
+      <td>Rabbit</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>Cat</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>Cat</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5</td>
+      <td>Dog</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><p>On the other hand, since ShuffleStainer had already been run to obtain animal_ddf3, we can verify that animal_ddf3 does not contain
+ShuffleStainer anymore.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf3</span><span class="o">.</span><span class="n">summarise_stainers</span><span class="p">()</span> <span class="c1">#empty</span>
+</pre></div>
+</div>
+<p>We can view the history of stainers that were run to obtain animal_ddf3 (in this case, only the ShuffleStainer’s history) by using
+the DDF.print_history() method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf3</span><span class="o">.</span><span class="n">print_history</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1. Shuffle
+ Order of rows randomized
+ Time taken: 0.0010290145874023438
+</pre></div>
+</div>
+<p>We can also obtain the row and column mappings from the original df to the latest transformed df.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf3</span><span class="o">.</span><span class="n">get_map_from_history</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#index=0 since there was only 1 stainer used, and axis=0 specifies rows.</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{4: [0], 0: [1], 2: [2], 3: [3], 1: [4], 5: [5]}
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf3</span><span class="o">.</span><span class="n">get_map_from_history</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#axis=1 specifies columns. Note that ShuffleStainer doesn&#39;t alter columns.</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{0: [0], 1: [1]}
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiple-stainers-example">
+<h2>Multiple Stainers Example<a class="headerlink" href="#multiple-stainers-example" title="Permalink to this headline">¶</a></h2>
+<p>Now lets get to the beauty of DirtyDF: using multiple stainers for transformation. For this example, we use 3 stainers, namely,
+ShuffleStainer, InflectionStainer, and RowDuplicateStainer.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shuffle_stainer</span> <span class="o">=</span> <span class="n">ShuffleStainer</span><span class="p">()</span>
+<span class="n">dup_stainer</span> <span class="o">=</span> <span class="n">RowDuplicateStainer</span><span class="p">(</span><span class="n">deg</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="n">max_rep</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">inflection_stainer</span> <span class="o">=</span> <span class="n">InflectionStainer</span><span class="p">(</span><span class="n">num_format</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;lowercase&#39;</span><span class="p">,</span> <span class="s1">&#39;uppercase&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We work with the same dataset as before. However, note that we have to explicitly convert the ‘class’ column as ‘category’
+type. This is for the InflectionStainer to be able to detect the column as a categorical and automatically be applied onto it.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">animal</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can add multiple stainers at a time by passing a list of stainers into the .add_stainers()
+method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf_mult</span> <span class="o">=</span> <span class="n">DirtyDF</span><span class="p">(</span><span class="n">animal</span><span class="p">)</span><span class="o">.</span><span class="n">add_stainers</span><span class="p">([</span><span class="n">shuffle_stainer</span><span class="p">,</span> <span class="n">dup_stainer</span><span class="p">,</span> <span class="n">inflection_stainer</span><span class="p">])</span>
+
+<span class="n">animal_ddf_mult</span><span class="o">.</span><span class="n">summarise_stainers</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1. Shuffle
+2. Add Duplicates
+3. Inflection
+</pre></div>
+</div>
+<p>We can now run the stainers one-by-one by sequentially applying the .run_stainer() method.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Stainers are run in the order that they were inserted in. This order can be altered by using the DDF.reindex_stainer() method,
+or we can also shuffle the order of stainers by using the DDF.shuffle_stainer() method, however do note that not all stainers
+are able to be run in any order (i.e. some stainers may need to come before or after others).</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf_mult2</span> <span class="o">=</span> <span class="n">animal_ddf_mult</span><span class="o">.</span><span class="n">run_stainer</span><span class="p">()</span><span class="o">.</span><span class="n">run_stainer</span><span class="p">()</span><span class="o">.</span><span class="n">run_stainer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that we can also use .run_all_stainers() to run all stainers sequentially at once.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf_mult3</span> <span class="o">=</span> <span class="n">animal_ddf_mult</span><span class="o">.</span><span class="n">run_all_stainers</span><span class="p">()</span> <span class="c1">#does the same as above</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf_mult3</span><span class="o">.</span><span class="n">print_history</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1. Shuffle
+ Order of rows randomized
+ Time taken: 0.000997304916381836
+
+2. Add Duplicates
+ Added Duplicate Rows for 3 rows.
+  Each duplicated row should appear a maximum of 3 times.
+  Rows added: 6
+ Time taken: 0.0019969940185546875
+
+3. Inflection
+ Categorical inflections on:
+{&#39;class&#39;: {&#39;Dog&#39;: [&#39;DOG&#39;, &#39;dog&#39;], &#39;Cat&#39;: [&#39;CAT&#39;, &#39;cat&#39;], &#39;Rabbit&#39;: [&#39;rabbit&#39;, &#39;RABBIT&#39;]}}
+ Time taken: 0.0029892921447753906
+</pre></div>
+</div>
+<p>We can now view the transformed dataframe.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">animal_ddf_mult3</span><span class="o">.</span><span class="n">get_df</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>5</td>
+      <td>dog</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5</td>
+      <td>DOG</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5</td>
+      <td>DOG</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>CAT</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1</td>
+      <td>dog</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0</td>
+      <td>cat</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0</td>
+      <td>CAT</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0</td>
+      <td>cat</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>3</td>
+      <td>cat</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>3</td>
+      <td>CAT</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>3</td>
+      <td>CAT</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>2</td>
+      <td>rabbit</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.039 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-dirty-df-example-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/3cf03bc7fef047ea5bc00564b5722266/plot_dirty_df_example.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dirty_df_example.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/48e6697783a232fd928fb9fd2a4e4f2c/plot_dirty_df_example.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dirty_df_example.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="plot_retail_stainchaining_example.html" class="btn btn-neutral float-right" title="Retail Dataset Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="plot_basic_stainer_example.html" class="btn btn-neutral float-left" title="Basic Usage of Stainers (no DirtyDF)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Vik Gopal, Joel Tan, Justin Lo.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
