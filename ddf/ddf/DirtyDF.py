@@ -23,10 +23,11 @@ class DirtyDF:
         df : pd.DataFrame 
             Dataframe to be transformed.
         seed : int, optional
-            Controls the randomness of the staining process. For a deterministic behaviour, seed has to be fixed to an integer. 
-            If unspecified, will choose a random seed
+            Controls the randomness of the staining process. For a
+            deterministic behaviour, seed has to be fixed to an integer. If unspecified, will choose a random seed
         copy : boolean, optional
-            Not for use by user. Determines if a copy of DirtyDF is being created. If True, will copy the details from the previous DDF.
+            Not for use by user. Determines if a copy of DirtyDF is being
+            created. If True, will copy the details from the previous DDF.
         """
         self.df = df
         
@@ -79,8 +80,10 @@ class DirtyDF:
 
     def get_mapping(self, axis = 0):
         """ Mapping of rows/cols from original dataframe to most recent dataframe. 
-        A dictionary is returned with information on which index the original rows/cols are displayed in the newest dataframe. 
-        For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, the function will return {3: [2]}
+        A dictionary is returned with information on which index the original
+        rows/cols are displayed in the newest dataframe. 
+        For instance, if row 3 got shuffled to row 8 in the new dataframe, then
+        row 8 got shuffled to row 2, the function will return {3: [2]}
         
         Parameters
         ----------
@@ -108,14 +111,18 @@ class DirtyDF:
 
     def get_map_from_history(self, index, axis = 0):
         """ Mapping of rows/cols of the sepcified stainer transformation that had been executed.
-        A dictionary is returned with information on what row/col index right before the specified transformation has converted to after the transformation. 
-        For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, calling index=0 will return {3: [8]} 
+        A dictionary is returned with information on what row/col index right
+        before the specified transformation has converted to after the
+        transformation. 
+        For instance, if row 3 got shuffled to row 8 in the new dataframe, then
+        row 8 got shuffled to row 2, calling index=0 will return {3: [8]} 
         and calling index=1 will return {8: [2]}
         
         Parameters
         ----------
         index : int
-            Index of stainer sequence to query mapping. E.g. index=1 will query the mapping performed by the 2nd stainer operation.
+            Index of stainer sequence to query mapping. E.g. index=1 will query
+            the mapping performed by the 2nd stainer operation.
         axis : (0/1), optional
             If 0, returns the row mapping.
             If 1, returns the col mapping.
@@ -140,8 +147,10 @@ class DirtyDF:
         
     def get_previous_map(self, axis = 0):
         """ Mapping of rows/cols of the most recent stainer transformation that had been executed.
-        A dictionary is returned with information on what row/col index right before the transformation has converted to after the transformation. 
-        For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, the function will return {8: [2]}
+        A dictionary is returned with information on what row/col index right
+        before the transformation has converted to after the transformation. 
+        For instance, if row 3 got shuffled to row 8 in the new dataframe, then
+        row 8 got shuffled to row 2, the function will return {8: [2]}
         
         Parameters
         ----------
@@ -185,9 +194,13 @@ class DirtyDF:
         data : (str, str, float) tuple
             (name of stainer, message, time taken). Contains data to be used to create the History object
         row_map: {int: int} dictionary 
-            Row mapping showing the relationship between the original and new row positions. Only applies to transformation for the specific stainer.
+            Row mapping showing the relationship between the original and new
+            row positions. Only applies to transformation for the specific
+            stainer.
         col_map: {int: int} dictionary
-            Column mapping showing the relationship between the original and new column positions. Only applies to transformation for the specific stainer.
+            Column mapping showing the relationship between the original and
+            new column positions. Only applies to transformation for the
+            specific stainer.
         """
         self.history.append(History(data, row_map, col_map))
     
@@ -199,10 +212,12 @@ class DirtyDF:
         stain : Stainer or Stainer list 
             stainers to be added to the DDF to be executed in the future
         use_orig_row : boolean, optional
-            Indicates if indices in stainer refers to the initial dataframe, or the index of the dataframe at time of execution.
+            Indicates if indices in stainer refers to the initial dataframe, or
+            the index of the dataframe at time of execution.
             If True, indices from initial dataframe are used. Defaults to True
         use_orig_col : boolean, optional
-            Indicates if indices in stainer refers to the initial dataframe, or the index of the dataframe at time of execution.
+            Indicates if indices in stainer refers to the initial dataframe, or
+            the index of the dataframe at time of execution.
             If True, indices from initial dataframe are used. Defaults to True
             
         Returns
@@ -226,7 +241,8 @@ class DirtyDF:
         Parameters
         ----------
         new_order : int list
-            Indices of the new order of stainers. If original was [A, B, C] and new_order = [1, 2, 0], the resulting order will be [C, A, B].
+            Indices of the new order of stainers. If original was [A, B, C] and
+            new_order = [1, 2, 0], the resulting order will be [C, A, B].
         
         Returns
         ----------

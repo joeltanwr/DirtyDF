@@ -10,7 +10,8 @@ class Stainer:
 
     Note
     ----
-    This class is not meant to be used on its own, and is meant as the superclass of any custom stainer that may be developed in the future.
+    This class is not meant to be used on its own, and is meant as the
+    superclass of any custom stainer that may be developed in the future.
 
     Attributes
     ----------
@@ -21,8 +22,10 @@ class Stainer:
     col_idx : int list
         Column indices that the stainer will operate on.
     col_type : str
-        Column type that the stainer operates on, used for stainer to automatically select viable columns to operate on, if the user does not
-        pass in any col_idx. Currently supports ["all", "category", "cat", "datetime", "date", "time", "numeric", "int", "float"].
+        Column type that the stainer operates on, used for stainer to
+        automatically select viable columns to operate on, if the user does not
+        pass in any col_idx. Currently supports ["all", "category", "cat",
+        "datetime", "date", "time", "numeric", "int", "float"].
     """
     #: Defaults to "all", indicating all columns will be selected
     col_type = "all"
@@ -72,7 +75,8 @@ class Stainer:
         
         Note
         ----
-        This method does not return anything and simply raises an error. However, it is expected for the user to implement the transform method 
+        This method does not return anything and simply raises an error.
+        However, it is expected for the user to implement the transform method
         for their custom user-defined stainers.
 
         Parameters
