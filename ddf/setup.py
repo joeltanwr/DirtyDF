@@ -6,6 +6,8 @@ setup(
     packages=['ddf'],
     install_requires=[
         'pandas',
+        'statsmodels',
+        'scipy',
         'numpy; python_version >= "3.8"',
     ],
 )
