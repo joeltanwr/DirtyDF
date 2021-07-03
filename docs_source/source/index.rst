@@ -1,6 +1,7 @@
 DirtyDF
 =======
-Welcome to the DirtyDF documentation! 
+This page documents the DirtyDF Python package. If you have questions, please
+email me at `vik.gopal@nus.edu.sg`.
 
 Table of Contents
 =================
@@ -10,6 +11,7 @@ Table of Contents
 
    _autosummary/ddf_api_reference
    auto_examples/index
+   samplers
    license
 
 Introduction

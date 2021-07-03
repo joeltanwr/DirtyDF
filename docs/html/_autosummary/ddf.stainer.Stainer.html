@@ -13,8 +13,6 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
@@ -35,7 +33,6 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -189,16 +186,17 @@
   <div class="section" id="ddf-stainer-stainer">
 <h1>ddf.stainer.Stainer<a class="headerlink" href="#ddf-stainer-stainer" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ddf.stainer.</span></span><span class="sig-name descname"><span class="pre">Stainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unnamed</span> <span class="pre">Stainer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">ddf.stainer.</span></code><code class="sig-name descname"><span class="pre">Stainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unnamed</span> <span class="pre">Stainer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parent Stainer class that contains basic initialisations meant for all stainers to inherit from.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This class is not meant to be used on its own, and is meant as the superclass of any custom stainer that may be developed in the future.</p>
+<p>This class is not meant to be used on its own, and is meant as the
+superclass of any custom stainer that may be developed in the future.</p>
 </div>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#ddf.stainer.Stainer.name" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.name">
+<code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#ddf.stainer.Stainer.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of stainer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -208,8 +206,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.row_idx">
-<span class="sig-name descname"><span class="pre">row_idx</span></span><a class="headerlink" href="#ddf.stainer.Stainer.row_idx" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.row_idx">
+<code class="sig-name descname"><span class="pre">row_idx</span></code><a class="headerlink" href="#ddf.stainer.Stainer.row_idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Row indices that the stainer will operate on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -219,8 +217,8 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.col_idx">
-<span class="sig-name descname"><span class="pre">col_idx</span></span><a class="headerlink" href="#ddf.stainer.Stainer.col_idx" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.col_idx">
+<code class="sig-name descname"><span class="pre">col_idx</span></code><a class="headerlink" href="#ddf.stainer.Stainer.col_idx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Column indices that the stainer will operate on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -230,18 +228,20 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.col_type">
-<span class="sig-name descname"><span class="pre">col_type</span></span><a class="headerlink" href="#ddf.stainer.Stainer.col_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Column type that the stainer operates on, used for stainer to automatically select viable columns to operate on, if the user does not
-pass in any col_idx. Currently supports [“all”, “category”, “cat”, “datetime”, “date”, “time”, “numeric”, “int”, “float”].</p>
+<dt id="ddf.stainer.Stainer.col_type">
+<code class="sig-name descname"><span class="pre">col_type</span></code><a class="headerlink" href="#ddf.stainer.Stainer.col_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Column type that the stainer operates on, used for stainer to
+automatically select viable columns to operate on, if the user does not
+pass in any col_idx. Currently supports [“all”, “category”, “cat”,
+“datetime”, “date”, “time”, “numeric”, “int”, “float”].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unnamed</span> <span class="pre">Stainer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Unnamed</span> <span class="pre">Stainer'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor for Stainer class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -255,8 +255,8 @@ pass in any col_idx. Currently supports [“all”, “category”, “cat”, �
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.get_col_type">
-<span class="sig-name descname"><span class="pre">get_col_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.get_col_type" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.get_col_type">
+<code class="sig-name descname"><span class="pre">get_col_type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.get_col_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the column type that the stainer operates on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -269,8 +269,8 @@ pass in any col_idx. Currently supports [“all”, “category”, “cat”, �
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.get_history">
-<span class="sig-name descname"><span class="pre">get_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.get_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.get_history">
+<code class="sig-name descname"><span class="pre">get_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.get_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compiles history information for this stainer and returns it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -285,8 +285,8 @@ pass in any col_idx. Currently supports [“all”, “category”, “cat”, �
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.get_indices">
-<span class="sig-name descname"><span class="pre">get_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.get_indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.get_indices">
+<code class="sig-name descname"><span class="pre">get_indices</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.get_indices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the row indices and column indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -300,12 +300,13 @@ pass in any col_idx. Currently supports [“all”, “category”, “cat”, �
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.transform" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.transform">
+<code class="sig-name descname"><span class="pre">transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies staining on the given indices in the provided dataframe.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This method does not return anything and simply raises an error. However, it is expected for the user to implement the transform method
+<p>This method does not return anything and simply raises an error.
+However, it is expected for the user to implement the transform method
 for their custom user-defined stainers.</p>
 </div>
 <dl class="field-list simple">
@@ -332,8 +333,8 @@ for their custom user-defined stainers.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.Stainer.update_history">
-<span class="sig-name descname"><span class="pre">update_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.update_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.Stainer.update_history">
+<code class="sig-name descname"><span class="pre">update_history</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.Stainer.update_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used by transform method to set attributes required to display history information</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

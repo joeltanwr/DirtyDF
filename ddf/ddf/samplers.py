@@ -17,6 +17,8 @@ rand_from_density():
 rand_from_hist():
     Generate a new sample from a histogram estimate.
 
+rand_from_Finv():
+    Generate a new sample from an estimate of F-inverse.
 """
 
 import numpy as np
@@ -148,4 +150,49 @@ def rand_from_hist(X, rng, size=(1,10)):
     out = rng.uniform(hist_details[1][bin_choices],
     hist_details[1][bin_choices+1])
     
+    return out
+
+def rand_from_Finv(X, rng, size=(1,10), Xmin=None, Xmax = None, return_fn=False):
+    """
+    Returns a sample using the interpolated F-inverse function.
+
+    The Akima algorithm is used for interpolating the F-inverse function.
+
+    If `return_fn` is True, then the F-inverse function is returned, so that it
+    can be re-used.
+
+    Parameters
+    ----------
+    X       : The original dataset, as a 1-D numpy array.
+    rng     : random number generator. This should be the one from numpy.
+    size    : The array of random number variates to return.
+    Xmin    : The minimum of the support of X. If not provided, the minimum
+              observed X is used.
+    Xmax    : The minimum of the support of X. If not provided, the maximum 
+              observed X is used.
+    return_fn: A logical value. It determines if the F-inverse function is
+               returned. If True, then size argument is ignored. If False,
+               A numpy array is returned using the interpolated F-inverse.
+
+    >>> rng = np.random.default_rng(123)
+    >>> X = rng.exponential(2.0, size=100)
+    >>> X_F = rand_from_Finv(X, rng, size=100)
+
+    """
+    rvs_needed = np.array(size).prod()
+    ecdf1 = ECDF(X)
+    U = np.hstack((0.0, ecdf1.y[1:-1], 1.0))
+    
+    if Xmin is None:
+        Xmin = X.min()
+    if Xmax is None:
+        Xmax = X.max()
+        
+    Finv = np.hstack((Xmin, ecdf1.x[1:-1], Xmax))
+    ak2 = Akima1DInterpolator(U, Finv)
+    if return_fn:
+        return ak2
+
+    U_rand = rng.uniform(size=rvs_needed)
+    out = ak2(U_rand).reshape(size)
     return out

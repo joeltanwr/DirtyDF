@@ -13,8 +13,6 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
@@ -35,7 +33,6 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -189,8 +186,8 @@
   <div class="section" id="ddf-stainer-datetimesplitstainer">
 <h1>ddf.stainer.DatetimeSplitStainer<a class="headerlink" href="#ddf-stainer-datetimesplitstainer" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ddf.stainer.</span></span><span class="sig-name descname"><span class="pre">DatetimeSplitStainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Datetime</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">ddf.stainer.</span></code><code class="sig-name descname"><span class="pre">DatetimeSplitStainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Datetime</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stainer that splits each given date / datetime columns into 3 columns respectively, representing day, month, and year.</p>
 <p>If a given column’s name is ‘X’, then the respective generated column names are ‘X_day’, ‘X_month’, and ‘X_year’. If keep_time is True,
 then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwise, only dates will be kept.</p>
@@ -198,8 +195,8 @@ then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwis
 <p>For ‘X_month’ and ‘X_year’, a format from [‘m’, ‘%B’, ‘%b’], and [‘%Y’, ‘%y’] is randomly chosen respectively.</p>
 <blockquote>
 <div><dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Datetime</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Datetime</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>The constructor for DatetimeSplitStainer class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -214,8 +211,8 @@ then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwis
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer.get_col_type">
-<span class="sig-name descname"><span class="pre">get_col_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.get_col_type" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer.get_col_type">
+<code class="sig-name descname"><span class="pre">get_col_type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.get_col_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the column type that the stainer operates on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -228,8 +225,8 @@ then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwis
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer.get_history">
-<span class="sig-name descname"><span class="pre">get_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.get_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer.get_history">
+<code class="sig-name descname"><span class="pre">get_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.get_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compiles history information for this stainer and returns it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -244,8 +241,8 @@ then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwis
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer.get_indices">
-<span class="sig-name descname"><span class="pre">get_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.get_indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer.get_indices">
+<code class="sig-name descname"><span class="pre">get_indices</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.get_indices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the row indices and column indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -259,8 +256,8 @@ then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwis
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.transform" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer.transform">
+<code class="sig-name descname"><span class="pre">transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies staining on the given indices in the provided dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -283,8 +280,8 @@ then further generate ‘X_hour’, ‘X_minute’, and ‘X_second’. Otherwis
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.DatetimeSplitStainer.update_history">
-<span class="sig-name descname"><span class="pre">update_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.update_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.DatetimeSplitStainer.update_history">
+<code class="sig-name descname"><span class="pre">update_history</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.DatetimeSplitStainer.update_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used by transform method to set attributes required to display history information</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

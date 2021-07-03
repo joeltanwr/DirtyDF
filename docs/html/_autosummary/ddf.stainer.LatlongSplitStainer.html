@@ -13,8 +13,6 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
@@ -35,7 +33,6 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -189,16 +186,16 @@
   <div class="section" id="ddf-stainer-latlongsplitstainer">
 <h1>ddf.stainer.LatlongSplitStainer<a class="headerlink" href="#ddf-stainer-latlongsplitstainer" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ddf.stainer.</span></span><span class="sig-name descname"><span class="pre">LatlongSplitStainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Latlong</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">ddf.stainer.</span></code><code class="sig-name descname"><span class="pre">LatlongSplitStainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Latlong</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stainer that splits each given latlong columns into 6 columns, representing degree, minute, and seconds, for lat and long respectively.
 If a given column’s name is ‘X’, then the respective generated column names ‘X_lat_deg’, ‘X_lat_min’, ‘X_lat_sec’, ‘X_long_deg’, ‘X_long_min’,
 and ‘X_long_sec’.
 If a column is split, the original column will be dropped.</p>
 <blockquote>
 <div><dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Latlong</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Latlong</span> <span class="pre">Split'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for LatlongSplitStainer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -216,8 +213,8 @@ Defaults to 1.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer.get_col_type">
-<span class="sig-name descname"><span class="pre">get_col_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.get_col_type" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer.get_col_type">
+<code class="sig-name descname"><span class="pre">get_col_type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.get_col_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the column type that the stainer operates on.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -230,8 +227,8 @@ Defaults to 1.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer.get_history">
-<span class="sig-name descname"><span class="pre">get_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.get_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer.get_history">
+<code class="sig-name descname"><span class="pre">get_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.get_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compiles history information for this stainer and returns it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -246,8 +243,8 @@ Defaults to 1.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer.get_indices">
-<span class="sig-name descname"><span class="pre">get_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.get_indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer.get_indices">
+<code class="sig-name descname"><span class="pre">get_indices</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.get_indices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the row indices and column indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -261,8 +258,8 @@ Defaults to 1.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer.transform">
-<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.transform" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer.transform">
+<code class="sig-name descname"><span class="pre">transform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies staining on the given indices in the provided dataframe.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -285,8 +282,8 @@ Defaults to 1.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.stainer.LatlongSplitStainer.update_history">
-<span class="sig-name descname"><span class="pre">update_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.update_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.stainer.LatlongSplitStainer.update_history">
+<code class="sig-name descname"><span class="pre">update_history</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.stainer.LatlongSplitStainer.update_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Used by transform method to set attributes required to display history information</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

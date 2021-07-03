@@ -1,0 +1,32 @@
+Sampling from a Sample
+======================
+
+The `samplers` module contains a set of functions for generating samples from
+a *random i.i.d sample*. The output random variates should have similar 
+distribution to the input sample.
+
+The aim is different from bootstrapping, where we resample from the same
+values. Here, we will obtain from a smoother distribution.
+
+The basic problem is this: We are given an i.i.d sample X_1, X_2, .., X_n from a
+density f. We wish to generate Y_1, Y_2, ..., Y_m from the same unknown
+density. This is a difficult problem, but some progress is possible. 
+
+A good, detailed exposition of the methods implemented here can be found in
+[DEV1986]_.
+
+These are the functions that are present in this module:
+
+rand_bartlett():
+    Generate random variates from Bartlett kernel. (Helper)
+
+rand_from_density():
+    Generate new sample from a kernel density estimate.
+
+rand_from_hist():
+    Generate a new sample from a histogram estimate.
+
+rand_from_Finv():
+    Generate a new sample from an estimate of F-inverse.
+
+.. [DEV1986] *Sample-based Non-uniform Random Variate Generation*, Luc Devroye (1986)

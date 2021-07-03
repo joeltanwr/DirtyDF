@@ -13,8 +13,6 @@
   
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
   <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
@@ -35,7 +33,6 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -178,39 +175,42 @@
   <div class="section" id="ddf-dirtydf-dirtydf">
 <h1>ddf.DirtyDF.DirtyDF<a class="headerlink" href="#ddf-dirtydf-dirtydf" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ddf.DirtyDF.</span></span><span class="sig-name descname"><span class="pre">DirtyDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">ddf.DirtyDF.</span></code><code class="sig-name descname"><span class="pre">DirtyDF</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dirty DataFrame. Stores information about the dataframe to be stained, previous staining results,
 and the mapping of the rows and columns.</p>
 <p>To be used in conjunction with Stainer class to add and execute stainers.</p>
 <blockquote>
 <div><dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constructor for DirtyDF</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe to be transformed.</p></li>
-<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Controls the randomness of the staining process. For a deterministic behaviour, seed has to be fixed to an integer.
-If unspecified, will choose a random seed</p></li>
-<li><p><strong>copy</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Not for use by user. Determines if a copy of DirtyDF is being created. If True, will copy the details from the previous DDF.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Controls the randomness of the staining process. For a
+deterministic behaviour, seed has to be fixed to an integer. If unspecified, will choose a random seed</p></li>
+<li><p><strong>copy</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Not for use by user. Determines if a copy of DirtyDF is being
+created. If True, will copy the details from the previous DDF.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.add_stainers">
-<span class="sig-name descname"><span class="pre">add_stainers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_orig_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_orig_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.add_stainers" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.add_stainers">
+<code class="sig-name descname"><span class="pre">add_stainers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_orig_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_orig_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.add_stainers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a stainer / list of stainers to current list of stainers to be executed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stain</strong> (<a class="reference internal" href="ddf.stainer.Stainer.html#ddf.stainer.Stainer" title="ddf.stainer.Stainer"><em>Stainer</em></a><em> or </em><em>Stainer list</em>) – stainers to be added to the DDF to be executed in the future</p></li>
-<li><p><strong>use_orig_row</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Indicates if indices in stainer refers to the initial dataframe, or the index of the dataframe at time of execution.
+<li><p><strong>use_orig_row</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Indicates if indices in stainer refers to the initial dataframe, or
+the index of the dataframe at time of execution.
 If True, indices from initial dataframe are used. Defaults to True</p></li>
-<li><p><strong>use_orig_col</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Indicates if indices in stainer refers to the initial dataframe, or the index of the dataframe at time of execution.
+<li><p><strong>use_orig_col</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Indicates if indices in stainer refers to the initial dataframe, or
+the index of the dataframe at time of execution.
 If True, indices from initial dataframe are used. Defaults to True</p></li>
 </ul>
 </dd>
@@ -224,8 +224,8 @@ If True, indices from initial dataframe are used. Defaults to True</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.copy" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.copy">
+<code class="sig-name descname"><span class="pre">copy</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a copy of the DDF</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -238,8 +238,8 @@ If True, indices from initial dataframe are used. Defaults to True</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.get_df">
-<span class="sig-name descname"><span class="pre">get_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_df" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.get_df">
+<code class="sig-name descname"><span class="pre">get_df</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_df" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the dataframe</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -252,16 +252,20 @@ If True, indices from initial dataframe are used. Defaults to True</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.get_map_from_history">
-<span class="sig-name descname"><span class="pre">get_map_from_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_map_from_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.get_map_from_history">
+<code class="sig-name descname"><span class="pre">get_map_from_history</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_map_from_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mapping of rows/cols of the sepcified stainer transformation that had been executed.
-A dictionary is returned with information on what row/col index right before the specified transformation has converted to after the transformation.
-For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, calling index=0 will return {3: [8]}
+A dictionary is returned with information on what row/col index right
+before the specified transformation has converted to after the
+transformation.
+For instance, if row 3 got shuffled to row 8 in the new dataframe, then
+row 8 got shuffled to row 2, calling index=0 will return {3: [8]}
 and calling index=1 will return {8: [2]}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>index</strong> (<em>int</em>) – Index of stainer sequence to query mapping. E.g. index=1 will query the mapping performed by the 2nd stainer operation.</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – Index of stainer sequence to query mapping. E.g. index=1 will query
+the mapping performed by the 2nd stainer operation.</p></li>
 <li><p><strong>axis</strong> (<em>(</em><em>0/1</em><em>)</em><em>, </em><em>optional</em>) – <p>If 0, returns the row mapping.
 If 1, returns the col mapping.</p>
 <p>Defaults to 0</p>
@@ -281,11 +285,13 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.get_mapping">
-<span class="sig-name descname"><span class="pre">get_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_mapping" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.get_mapping">
+<code class="sig-name descname"><span class="pre">get_mapping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_mapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mapping of rows/cols from original dataframe to most recent dataframe.
-A dictionary is returned with information on which index the original rows/cols are displayed in the newest dataframe.
-For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, the function will return {3: [2]}</p>
+A dictionary is returned with information on which index the original
+rows/cols are displayed in the newest dataframe.
+For instance, if row 3 got shuffled to row 8 in the new dataframe, then
+row 8 got shuffled to row 2, the function will return {3: [2]}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>0/1</em><em>)</em><em>, </em><em>optional</em>) – <p>If 0, returns the row mapping.
@@ -306,11 +312,13 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.get_previous_map">
-<span class="sig-name descname"><span class="pre">get_previous_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_previous_map" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.get_previous_map">
+<code class="sig-name descname"><span class="pre">get_previous_map</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_previous_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mapping of rows/cols of the most recent stainer transformation that had been executed.
-A dictionary is returned with information on what row/col index right before the transformation has converted to after the transformation.
-For instance, if row 3 got shuffled to row 8 in the new dataframe, then row 8 got shuffled to row 2, the function will return {8: [2]}</p>
+A dictionary is returned with information on what row/col index right
+before the transformation has converted to after the transformation.
+For instance, if row 3 got shuffled to row 8 in the new dataframe, then
+row 8 got shuffled to row 2, the function will return {8: [2]}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>0/1</em><em>)</em><em>, </em><em>optional</em>) – <p>If 0, returns the row mapping.
@@ -331,8 +339,8 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.get_rng">
-<span class="sig-name descname"><span class="pre">get_rng</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_rng" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.get_rng">
+<code class="sig-name descname"><span class="pre">get_rng</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_rng" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns seed generator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -345,8 +353,8 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.get_seed">
-<span class="sig-name descname"><span class="pre">get_seed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_seed" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.get_seed">
+<code class="sig-name descname"><span class="pre">get_seed</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.get_seed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns seed number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -359,18 +367,19 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.print_history">
-<span class="sig-name descname"><span class="pre">print_history</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.print_history" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.print_history">
+<code class="sig-name descname"><span class="pre">print_history</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.print_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print historical details of the stainers that have been executed</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.reindex_stainers">
-<span class="sig-name descname"><span class="pre">reindex_stainers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.reindex_stainers" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.reindex_stainers">
+<code class="sig-name descname"><span class="pre">reindex_stainers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.reindex_stainers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reorder stainers in a specified order</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new_order</strong> (<em>int list</em>) – Indices of the new order of stainers. If original was [A, B, C] and new_order = [1, 2, 0], the resulting order will be [C, A, B].</p>
+<dd class="field-odd"><p><strong>new_order</strong> (<em>int list</em>) – Indices of the new order of stainers. If original was [A, B, C] and
+new_order = [1, 2, 0], the resulting order will be [C, A, B].</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>ddf</strong> – Returns new copy of DDF with the stainers rearranged</p>
@@ -382,14 +391,14 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.reset_rng">
-<span class="sig-name descname"><span class="pre">reset_rng</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.reset_rng" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.reset_rng">
+<code class="sig-name descname"><span class="pre">reset_rng</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.reset_rng" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resets Random Generator object</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.run_all_stainers">
-<span class="sig-name descname"><span class="pre">run_all_stainers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.run_all_stainers" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.run_all_stainers">
+<code class="sig-name descname"><span class="pre">run_all_stainers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.run_all_stainers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the transformation of all stainers in order</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -402,8 +411,8 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.run_stainer">
-<span class="sig-name descname"><span class="pre">run_stainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.run_stainer" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.run_stainer">
+<code class="sig-name descname"><span class="pre">run_stainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.run_stainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the transformation of the specified stainer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -419,8 +428,8 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.shuffle_stainers">
-<span class="sig-name descname"><span class="pre">shuffle_stainers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.shuffle_stainers" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.shuffle_stainers">
+<code class="sig-name descname"><span class="pre">shuffle_stainers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.shuffle_stainers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Randomly reorder the stainers</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -433,8 +442,8 @@ If 1, returns the col mapping.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ddf.DirtyDF.DirtyDF.summarise_stainers">
-<span class="sig-name descname"><span class="pre">summarise_stainers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.summarise_stainers" title="Permalink to this definition">¶</a></dt>
+<dt id="ddf.DirtyDF.DirtyDF.summarise_stainers">
+<code class="sig-name descname"><span class="pre">summarise_stainers</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ddf.DirtyDF.DirtyDF.summarise_stainers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints names of stainers that have yet to be executed</p>
 </dd></dl>
 
