@@ -175,8 +175,13 @@ def rand_from_Finv(X, rng, size=(1,10), Xmin=None, Xmax = None, return_fn=False)
                A numpy array is returned using the interpolated F-inverse.
 
     >>> rng = np.random.default_rng(123)
-    >>> X = rng.exponential(2.0, size=100)
-    >>> X_F = rand_from_Finv(X, rng, size=100)
+    >>> X = rng.exponential(2.2, size=100)
+    >>> X_from_F = rand_from_Finv(X, rng, size=200)
+    >>> X_from_F[:5]
+    array([3.55652952, 0.31075643, 0.87066671, 1.87087861, 5.23183298])
+    >>> Finv = rand_from_Finv(X, rng, return_fn=True)
+    >>> Finv(rng.uniform(size=3))
+    array([1.52988127, 1.0962427 , 0.86032202])
 
     """
     rvs_needed = np.array(size).prod()

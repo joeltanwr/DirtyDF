@@ -8,6 +8,7 @@ setup(
         'pandas',
         'statsmodels',
         'scipy',
+        'inflection',
         'numpy; python_version >= "3.8"',
     ],
 )
