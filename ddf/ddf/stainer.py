@@ -5,6 +5,11 @@ import itertools
 from itertools import product
 from pandas.api.types import is_numeric_dtype, is_datetime64_any_dtype, is_categorical_dtype
 
+from statsmodels.regression.linear_model import OLS
+from statsmodels.tools import add_constant
+from scipy.stats import spearmanr,norm
+from .samplers import rand_from_Finv
+
 class Stainer:
     """Parent Stainer class that contains basic initialisations meant for all stainers to inherit from.
 
@@ -1238,3 +1243,529 @@ class LatlongSplitStainer(Stainer):
         end = time()
         self.update_history(message, end - start)
         return new_df, {}, col_map_dct
+
+
+class ColumnSplitter(Stainer):
+    """ Stainer to split text columns, creating a ragged DataFrame """
+    
+    def __init__(self, name = "Column splitter", col_idx = [], regex_string=" "):
+        """ Constructor for ColumnSplitter
+        
+        Parameters
+        ----------
+        name: str, optional.
+            Name of stainer. 
+        col_idx: int list, required. This has to be a single integer. This is 
+                 the column that will be split into two.
+        regex_string: The string to split the column on. For instance, "(?=-)" is a
+                 look-ahead assertion that splits on a hyphen. Using lookahead or 
+                 look-behind strings ensures that the splitting character is retained.                 
+                 
+        Raises
+        ------
+        ValueError
+            If col_idx is missing, or is length greater than 1.
+        """
+        if ((type(col_idx) is not list) or (len(col_idx) != 1)):
+            raise ValueError("col_idx must be a list with a single integer.")
+        super().__init__(name, [], col_idx)
+        self.regex_string = regex_string
+        
+    def transform(self, df, rng, row_idx=None, col_idx=None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator. Unused by this stainer.
+        row_idx : int list, optional
+            Unused parameter.
+        col_idx : int list, optional
+            Unused parameter.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe, with one extra column on the right.
+        row_map : empty dictionary
+            Row mapping showing the relationship between the original and new row positions.
+        col_map : A dictionary
+            Generating the column map is tricky in this situation, because after the split column,
+            on the right, each column actually contains information from two original columns. One option 
+            is to indicate which two columns each new column maps to, but, since most of the original 
+            columns were retained, we only indicate that the right-most column has been mapped to the
+            last two of the new dataframe.
+       
+        >>> rng = np.random.default_rng(12)
+        >>> x = pd.DataFrame({'label': ['T-LIGHT', 'ASHTRAY'], 'price': [2.30, 3.20]})
+        >>> print(x)
+             label  price
+        0  T-LIGHT    2.3
+        1  ASHTRAY    3.2
+        
+        >>> cc = ColumnSplitter(col_idx=[0], regex_string="(?=-)")
+        >>> new_x, rmap, cmap = cc.transform(x, rng)
+        >>> print(new_x) # see the ragged dataframe.. it contains unnamed column on the right.
+             label   price     
+        0        T  -LIGHT  2.3
+        1  ASHTRAY     3.2  NaN
+        
+        >>> print(cmap)
+        {0: [0], 1: [1, 2]}
+        
+        """
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+        start = time()
+        
+        org_col_index = new_df.columns
+        col_name = org_col_index[col_idx[0]]
+        split_id = np.argwhere(org_col_index == col_name).reshape(1)[0]
+        
+        # split the original df into three sections: 
+        # to_keep, col_to_split and cols_to_join_back
+        to_keep = new_df.iloc[:, :split_id].copy(deep=True)
+        to_split = df[[col_name]].copy(deep=True)
+        to_join = df.iloc[:, (split_id+1):].copy(deep=True)
+        cols_to_add = np.hstack((org_col_index[(split_id+1):], ''))
+        to_join[''] = pd.Series([np.NaN]*to_join.shape[0])
+        
+        #split the column:
+        to_split = to_split[col_name].str.split(self.regex_string, n=1, expand=True)
+        to_split.columns = [col_name, cols_to_add[0]]
+        
+        # join the split column back first
+        #to_keep = pd.concat([to_keep, to_split], axis=1)
+        to_keep = to_keep.join(to_split)
+        na_boolean = to_keep[cols_to_add[0]].isna()
+        to_keep = to_keep.combine_first(to_join[[cols_to_add[0]]])
+        #breakpoint()
+        
+        for i in np.arange(1,len(cols_to_add)):
+            #print(i)
+            new_col = to_join.iloc[:, i].copy(deep=True)
+            new_col[~na_boolean] = to_join.iloc[:, i-1][~na_boolean]
+            to_keep = pd.concat([to_keep, new_col], axis=1)
+            #print(cols_to_add[i])
+        #print(cols_to_add)
+        #return to_keep[np.hstack((org_col_index, ''))]
+        
+        # create col-map:
+        cmap = {}
+        for ii in np.arange(df.shape[1]):
+            cmap[ii] = [ii]
+        cmap[df.shape[1]-1] = [df.shape[1]-1, df.shape[1]]
+        # print(cmap)
+        
+        end = time()
+        self.update_history(f"Column id {col_name} split into two.", end-start)
+        self.update_history(message = f"New dataframe has {to_keep.shape[1]} columns now.")
+        return to_keep[np.hstack((org_col_index, ''))],{},cmap
+
+    
+class ColumnJoiner(Stainer):
+    """ Stainer to join text columns, creating a ragged DataFrame """
+    
+    def __init__(self, name = "Column splitter", row_idx =[], col_idx = []):
+        """ Constructor for ColumnJoiner
+        
+        Parameters
+        ----------
+        name: str, optional.
+            Name of stainer. 
+        col_idx: int list, required. This has to contain two consecutive integers. These are 
+                 the columns that will be catenated.
+        row_idx: int list, required. These will be the rows that will be "shifted" inwards.
+                 
+        Raises
+        ------
+        ValueError
+            If col_idx has length not equals to two, or the values are not consecutive.
+        ValueError
+            If row_idx is empty.
+        """
+        if ((len(col_idx) != 2) or (col_idx[1] - col_idx[0] != 1)):
+            raise ValueError("col_idx must contain two consecutive integers.")
+        if(len(row_idx) == 0):
+            raise ValueError("row_idx should not be empty.")
+        super().__init__(name, row_idx, col_idx)
+        
+    def transform(self, df, rng, row_idx=None, col_idx=None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator. Unused by this stainer.
+        row_idx : int list, optional
+            Unused parameter.
+        col_idx : int list, optional
+            Unused parameter.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe, with some columns shifted "inwards"
+        row_map : empty dictionary.
+        col_map : empty dictionary.
+       
+        >>> rng = np.random.default_rng(12)
+        >>> x = pd.DataFrame({'label': ['T-LIGHT', 'ASHTRAY'], 'dept':['A1', 'A2'], 'price': [2.30, 3.20]})
+        >>> print(x)
+             label dept  price
+        0  T-LIGHT   A1    2.3
+        1  ASHTRAY   A2    3.2
+
+        >>> cj1 = ColumnJoiner('test joiner', [1], [0,1])
+        >>> print(cj1.transform(x, rng))
+               label dept  price
+        0    T-LIGHT   A1    2.3
+        1  ASHTRAYA2  3.2    NaN
+        
+        """
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+        start = time()
+                
+        org_col_index = new_df.columns
+        col_names = org_col_index[col_idx]
+        
+        split_id = np.argwhere(org_col_index == col_names[1]).reshape(1)[0]
+        to_keep = new_df.loc[:, :col_names[0]].copy(deep=True)
+        join_series = new_df[col_names[1]].copy(deep=True)
+        to_join = new_df.iloc[:, split_id:].copy(deep=True)
+
+        # breakpoint()
+        # modify the column to join, and paste with to_keep
+        join_series[~join_series.index.isin(row_idx)] = ''
+        to_keep[col_names[0]] = to_keep[col_names[0]] + join_series
+        
+        for i in np.arange(split_id, new_df.shape[1]):
+            # print(i)
+            new_col = new_df.iloc[:, i].copy(deep=True)
+            if i < (new_df.shape[1] - 1):
+                new_col[row_idx] = new_df.iloc[:, i+1][row_idx]
+            else:
+                new_col[row_idx] = np.NaN
+            to_keep = pd.concat([to_keep, new_col], axis=1)
+            #breakpoint()
+        
+        end = time()
+        self.update_history(f"Column id {col_names[0]} and {col_names[1]} joined at certain rows.", end-start)
+        return to_keep,{},{}
+
+
+class ResidualResampler(Stainer):
+    """ Stainer to resample residuals from a linear model and return new y's. """
+    
+    def __init__(self, name = "Residual resampler", row_idx =[], col_idx = []):
+        """ Constructor for ResidualResampler
+        
+        Parameters
+        ----------
+        name: str, optional.
+            Name of stainer. 
+        col_idx: int list, required. This should specify at least two columns. The first will
+                 be used as the y-variable, and the others will be used as the X matrix.
+        row_idx: int list, unused.
+                 
+        Raises
+        ------
+        ValueError
+            If col_idx has length not equals to two, or the values are not consecutive.
+        """
+        if len(col_idx) < 2:
+            raise ValueError("col_idx must contain at least two integers.")
+        super().__init__(name, row_idx, col_idx)
+        
+    def transform(self, df, rng, row_idx=None, col_idx=None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        A ordinary least squares linear model is fit, using statsmodels. The residuals are then
+        sampled from using rand_from_Finv (from ddf.samplers) and added back to the fitted y-hats
+        to create a new set of y-values.
+        
+        This stainer should result in a similar fit, but slightly different diagnostics/statistics.
+        
+        The user should check if the new y-values are valid or not (e.g. are they negative when they 
+        shouldn't be?)
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter.
+        col_idx : int list, optional
+            Unused parameter.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe, with some columns shifted "inwards"
+        row_map : empty dictionary.
+        col_map : empty dictionary.
+       
+        >>> rng = np.random.default_rng(12)
+        >>> x = np.arange(1, 11)
+        >>> y = x*2.3 + 3 + rng.normal(scale=1.6, size=10)
+        >>> org_df = pd.DataFrame({'x':x, 'y':y})
+
+        >>> rr = ResidualResampler('test rr', [], [1,0])
+        >>> new_df = rr.transform(org_df, rng)
+
+        >>> print(pd.concat((org_df, new_df), axis=1))
+            x          y   x          y
+        0   1   5.289077   1   4.155549
+        1   2   9.273829   2   8.747416
+        2   3  11.086541   3   8.444612
+        3   4  13.358330   4  11.250526
+        4   5  17.090042   5  14.005535
+        5   6  14.871107   6  16.610120
+        6   7  18.096871   7  18.940797
+        7   8  19.286939   8  23.466323
+        8   9  23.527596   9  21.974412
+        9  10  27.598022  10  23.545538
+
+        """
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+        start = time()
+        
+        # drop missing values
+        col_names = new_df.columns[col_idx]
+        fit_df = new_df.iloc[:, col_idx].dropna()
+        
+        X = add_constant(fit_df.iloc[:, 1:])
+        y = fit_df.iloc[:,0]
+    
+        # fit and predict from the model
+        m = OLS(y, X)
+        o = m.fit()
+        new_resid = rand_from_Finv(o.resid, rng, size=len(o.resid))
+        new_y = o.predict(X) + new_resid
+        
+        # only put new values where we could predict values; otherwise keep old y-values.
+        new_df.loc[y.index, col_names[0]] = new_y
+        
+        end = time()
+        self.update_history(f"New y-values in column {col_idx[0]} by sampling from residual distribution.", 
+                            end-start)
+        return new_df,{},{}
+
+
+class InsertOutliers(Stainer):
+    """ Stainer to insert outliers at influential points using a linear model. """
+    
+    def __init__(self, name = "Inserts outliers", row_idx =[], col_idx = [], n=5):
+        """ Constructor for InsertOutliers
+        
+        Parameters
+        ----------
+        name: str, optional.
+            Name of stainer. 
+        col_idx: int list, required. This should specify at least two columns. The first will
+                 be used as the y-variable, and the others will be used as the X matrix.
+        row_idx: int list, unused.
+        n:       number of outliers to insert. The default is 5.
+                 
+        Raises
+        ------
+        ValueError
+            If col_idx has length not equals to two, or the values are not consecutive.
+        """
+        if len(col_idx) < 2:
+            raise ValueError("col_idx must contain at least two integers.")
+        super().__init__(name, row_idx, col_idx)
+        self.n = n
+        
+    def transform(self, df, rng, row_idx=None, col_idx=None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        A ordinary least squares linear model is fit, using statsmodels. 
+        
+        The 5 most influential points are identified (using their leverage).
+        
+        The residuals for these 5 points are replaced by sampling from the 5% tails of the residual 
+        distributions.
+        
+        This stainer should result in a similar fit, but slightly different diagnostics/statistics.
+        
+        The user should check if the new y-values are valid or not (e.g. are they negative when they 
+        shouldn't be?)
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter.
+        col_idx : int list, optional
+            Unused parameter.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+            Modified dataframe, with some columns shifted "inwards"
+        row_map : empty dictionary.
+        col_map : empty dictionary.
+       
+        >>> rng = np.random.default_rng(12)
+        >>> x = np.arange(1, 11)
+        >>> x[-2:] = [15,16]
+
+        >>> y = x*2 + 3 + rng.normal(scale=5, size=10)
+        >>> org_df = pd.DataFrame({'x':x, 'y':y})
+
+        >>> rr = InsertOutliers('test outliers', [], [1,0], n=2)
+        >>> new_df = rr.transform(org_df, rng)[0]
+
+        >>> print(pd.concat((org_df, new_df), axis=1))
+            x          y   x          y
+        0   1   4.965866   1   4.965866
+        1   2  12.230716   2  12.230716
+        2   3  12.707942   3  12.707942
+        3   4  14.619783   4  14.619783
+        4   5  21.093881   5  21.093881
+        5   6   8.972209   6   8.972209
+        6   7  13.865223   7  13.865223
+        7   8  12.396684   8  12.396684
+        8  15  32.461237  15  39.217787
+        9  16  39.993818  16  27.541544
+
+        """
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+        start = time()
+        
+        # drop missing values
+        col_names = new_df.columns[col_idx]
+        fit_df = new_df.iloc[:, col_idx].dropna()
+        
+        X = add_constant(fit_df.iloc[:, 1:])
+        y = fit_df.iloc[:,0]
+    
+        # obtain a function to sample from residuals
+        m = OLS(y, X)
+        o = m.fit()
+        Finv = rand_from_Finv(o.resid, rng, return_fn=True)
+        
+        # derive leverage
+        hhh4 = pd.Series(np.diag(np.matmul(np.matmul(X.values, 
+                                                     np.linalg.inv(np.matmul(np.transpose(X.values), X.values))), 
+                                           np.transpose(X.values))))
+        hhh4.index = X.index
+        replace_these = hhh4.nlargest(self.n).index
+        
+        # sample from tails
+        V = rng.random(size=self.n)
+        W = [rng.uniform(0.0, 0.05,1)[0] if (x <= 0.5) else rng.uniform(0.95, 1.00, 1)[0] for x in V ]
+        
+        # only put new values where we could predict values; otherwise keep old y-values.
+        new_y = o.predict(X.loc[replace_these,:]) + Finv(W)
+        #f2 = df.copy(deep=True)
+        new_df.loc[replace_these, col_names[0]] = new_y        
+        
+        end = time()
+        self.update_history(f"Outliers in column {col_idx[0]} by sampling from residual distribution.", 
+                            end-start)
+        return new_df,{},{}
+
+
+class ModifyCorrelation(Stainer):
+    """ Stainer to modify correlation between two columns. """
+    
+    def __init__(self, name = "Inserts outliers", row_idx =[], col_idx = [], rho=None):
+        """ Constructor for ModifyCorrelation
+        
+        Parameters
+        ----------
+        name: str, optional.
+            Name of stainer. 
+        col_idx: int list, required. This should specify exactly two numeric columns.
+        row_idx: int list, unused.
+        rho:     New correlation between the two columns.
+                 
+        Raises
+        ------
+        ValueError
+            If col_idx has length not equals to two, or the values are not consecutive.
+        """
+        if len(col_idx) != 2:
+            raise ValueError("col_idx must contain exactly two integers.")
+        if rho is None:
+            raise ValueError("rho needs to specified.")
+        super().__init__(name, row_idx, col_idx)
+        self.rho = rho
+        
+    def transform(self, df, rng, row_idx=None, col_idx=None):
+        """Applies staining on the given indices in the provided dataframe.
+        
+        A multivariate normal copula is used, with the Finv being fitted using the Akima interpolator.
+        
+        Parameters
+        ----------
+        df : pd.DataFrame 
+            Dataframe to be transformed.
+        rng : np.random.BitGenerator
+            PCG64 pseudo-random number generator.
+        row_idx : int list, optional
+            Unused parameter.
+        col_idx : int list, optional
+            Unused parameter.
+        
+        Returns
+        -------
+        new_df : pd.DataFrame
+        row_map : empty dictionary.
+        col_map : empty dictionary.
+       
+        >>> rng = np.random.default_rng(12)
+        >>> x = np.arange(0, 100)
+        >>> y = x*2 + 3 + rng.normal(scale=25, size=100)
+        >>> org_df = pd.DataFrame({'x':x, 'y':y})
+        >>> spearmanr(org_df.x, org_df.y)[0]
+        0.9324692469246924
+
+        >>> rr = ModifyCorrelation('test rr', [], [1,0], rho=0.0)
+        >>> new_df = rr.transform(org_df, rng)[0]
+        >>> spearmanr(new_df.x, new_df.y)[0]
+        0.12897689768976897
+        """
+        new_df, row_idx, col_idx = self._init_transform(df, row_idx, col_idx)
+        start = time()
+
+        # drop missing values
+        col_names = new_df.columns[col_idx]
+        fit_df = new_df.iloc[:, col_idx].dropna()
+        
+        # estimate Finv, Ginv
+        X1 = fit_df.iloc[:, 0]
+        Finv = rand_from_Finv(X1, rng, return_fn=True)
+        X2 = fit_df.iloc[:, 1]
+        Ginv = rand_from_Finv(X2, rng, return_fn=True)
+        
+        org_corr = spearmanr(X1, X2)[0]
+
+        # sample multivariate normal with desired correlation
+        mu = np.zeros(2)
+        sigma = np.ones((2,2))
+        sigma[0,1] = sigma[1,0] = self.rho
+        Xn = rng.multivariate_normal(mu, sigma, size=new_df.shape[0], method='cholesky')
+
+        # apply norm cdf to array
+        Yn = norm.cdf(Xn)
+
+        # apply Finv, Ginv
+        new_col1 = Finv(Yn[:,0])
+        new_col2 = Ginv(Yn[:,1])
+        new_df.loc[:, col_names[0]] = new_col1
+        new_df.loc[:, col_names[1]] = new_col2
+        
+        end = time()
+        self.update_history(f"Correlation modified from {org_corr:.2f} to {self.rho:.2f}.", end-start)
+        return new_df,{},{}
