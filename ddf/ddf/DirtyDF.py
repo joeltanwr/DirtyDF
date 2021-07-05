@@ -4,8 +4,8 @@ from numpy.random import default_rng
 from time import time
 from functools import reduce
 from warnings import warn
-from ddf.stainer import *
-from ddf.history import *
+from .stainer import Stainer
+from .history import *
 
 class DirtyDF:
     """
