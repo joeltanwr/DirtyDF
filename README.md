@@ -6,6 +6,10 @@
 
 The main documentation can be found here: https://joeltanwr.github.io/DirtyDF/html/
 
+To install, you can now do:
+
+`pip install dirtydf`
+
 
 <!-- LICENSE -->
 ## License
